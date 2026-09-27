@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="color-scheme" content="light dark">
-  <meta name="theme-color" content="#111827">
-  <script>try{let p=localStorage.getItem('scp-theme')||'system';document.documentElement.dataset.theme=p==='system'?(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'):p}catch{document.documentElement.dataset.theme='light'}</script>
+  <meta name="theme-color" content="#f7f8f4">
+  <script>try{let p=localStorage.getItem('scp-theme')||'light';let t=p==='system'?(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'):p;document.documentElement.dataset.theme=t;document.querySelector('meta[name="theme-color"]').content=t==='dark'?'#121c1e':'#f7f8f4'}catch{document.documentElement.dataset.theme='light'}</script>
   <title>Skill Control Plane</title>
   <link rel="icon" type="image/svg+xml" href="/assets/skill-control-plane-mark.svg">
   <link rel="stylesheet" href="/styles.css">
@@ -18,7 +18,7 @@
         <img class="brand-mark" src="/assets/skill-control-plane-mark.svg" alt="" aria-hidden="true">
         <div><strong>Skill Control Plane</strong><small data-i18n="Local Manager">Local Manager</small></div>
       </div>
-      <nav class="nav-list">
+      <nav class="nav-list" id="primaryNavigation">
         <a href="#/overview" data-route="overview"><svg class="nav-icon" aria-hidden="true"><use href="/assets/icons.svg#home"></use></svg><span data-i18n="Home">Home</span></a>
         <a href="#/skills" data-route="skills"><svg class="nav-icon" aria-hidden="true"><use href="/assets/icons.svg#library"></use></svg><span data-i18n="Skill Library">Skill Library</span></a>
         <a href="#/workflows" data-route="workflows"><svg class="nav-icon" aria-hidden="true"><use href="/assets/icons.svg#automation"></use></svg><span data-i18n="Automations">Automations</span></a>
@@ -33,7 +33,7 @@
 
     <section class="workspace">
       <header class="topbar">
-        <button class="icon-button nav-toggle" id="navToggle" aria-label="Toggle navigation" data-i18n-aria-label="Toggle navigation"><svg class="ui-icon" aria-hidden="true"><use href="/assets/icons.svg#menu"></use></svg></button>
+        <button class="icon-button nav-toggle" id="navToggle" aria-label="Toggle navigation" data-i18n-aria-label="Toggle navigation" aria-controls="primaryNavigation" aria-expanded="false"><svg class="ui-icon" aria-hidden="true"><use href="/assets/icons.svg#menu"></use></svg></button>
         <div class="global-search-wrap">
           <label class="sr-only" for="globalSearch" data-i18n="Search Skills">Search Skills</label>
           <svg class="search-icon" aria-hidden="true"><use href="/assets/icons.svg#search"></use></svg>

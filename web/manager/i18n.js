@@ -221,6 +221,8 @@
     'When to use it': '使用条件',
     'Fallback Skill': '备用 Skill',
     'What is a workflow?': '什么是工作流？',
+    'How workflows work': '工作流使用指南',
+    'Three steps from plan to Agent prompt': '从计划到 Agent 提示词，只需三步',
     'A workflow is a reusable execution plan: describe what each stage should accomplish, then attach Skills only where the Agent needs a specific capability.': '工作流是一套可以重复执行的计划：先写清楚每个阶段要完成什么，再只在需要特定能力的阶段绑定 Skill。',
     'A workflow is a reusable way of doing a task: put Skills in order, tell the Agent the goal, and let it follow the steps.': '工作流就是一套可以重复使用的做事方法：把 Skill 按顺序排好，告诉 Agent 最终目标，让它一步一步照着做。',
     'A workflow is a reusable execution plan: describe each stage in normal language, then attach Skills only where that stage needs a specific capability.': '工作流是一套可以重复执行的计划：先用自然语言写清楚每个阶段，再只在这个阶段需要特定能力时绑定 Skill。',

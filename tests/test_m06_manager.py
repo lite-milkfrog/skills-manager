@@ -212,6 +212,22 @@ def test_m11_skill_resource_total_cap_is_bounded(seeded) -> None:
     assert bundle["truncated"] is True
 
 
+def test_workflow_family_listing_spans_service_page_boundary(seeded) -> None:
+    service = WorkflowService(seeded["db"])
+    for version in range(1, 202):
+        spec = workflow_spec_m06()
+        spec["version"] = version
+        service.create_workflow(spec)
+
+    manager = backend(seeded)
+    page = manager.workflow_list(name="M06 view", limit=200, include_archived=True)
+    assert page["total"] == 201
+    assert page["next_cursor"] == 200
+    assert manager.workflow_list(
+        name="M06 view", cursor=200, include_archived=True
+    )["items"][0]["version"] == 1
+
+
 def test_m06_workflow_run_and_runtime_read_adapters(seeded, monkeypatch) -> None:
     workflow = WorkflowService(seeded["db"]).create_workflow(workflow_spec_m06())
     manager = backend(seeded)
@@ -236,6 +252,45 @@ def test_m06_workflow_run_and_runtime_read_adapters(seeded, monkeypatch) -> None
     assert health["integrity"]["integrity_check"] == ["ok"]
     assert health["integrity"]["foreign_key_violations"] == []
     assert health["integrity"]["schema_version"] == 4
+
+
+def test_workflow_http_archive_restore_and_delete_gate(seeded) -> None:
+    workflow_id = WorkflowService(seeded["db"]).create_workflow(workflow_spec_m06())[
+        "workflow_id"
+    ]
+    server = create_server(
+        "127.0.0.1", 0, registry=seeded["registry"], db_path=seeded["db"].path,
+        explorer_opener=lambda _path: None,
+    )
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    base = f"http://127.0.0.1:{server.server_address[1]}/api/workflows/{workflow_id}"
+
+    def post(suffix: str, body: dict) -> dict:
+        request = urllib.request.Request(
+            base + suffix, data=json.dumps(body).encode(),
+            headers={"Content-Type": "application/json"}, method="POST",
+        )
+        with urllib.request.urlopen(request, timeout=2) as response:
+            return json.loads(response.read())
+
+    try:
+        with urllib.request.urlopen(base + "/usage", timeout=2) as response:
+            assert json.loads(response.read())["run_count"] == 0
+        with pytest.raises(urllib.error.HTTPError) as exc:
+            post("/delete", {"confirm": True})
+        assert exc.value.code == 400
+        assert post("/archive", {})["archived"] is True
+        with pytest.raises(urllib.error.HTTPError) as exc:
+            post("/delete", {})
+        assert exc.value.code == 400
+        assert post("/restore", {})["archived"] is False
+        assert post("/archive", {})["archived"] is True
+        assert post("/delete", {"confirm": True})["deleted"] is True
+    finally:
+        server.shutdown()
+        server.server_close()
+        thread.join(timeout=2)
 
 
 def test_web_manager_typed_api_and_no_physical_apply(seeded) -> None:

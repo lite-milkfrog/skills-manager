@@ -889,10 +889,17 @@ class ManagerBackend:
         include_archived: bool = False,
     ) -> dict[str, Any]:
         with self._db() as db:
-            page = WorkflowService(db).list_workflows(
-                cursor=0, limit=200, include_archived=include_archived
-            )
-        items = page["items"]
+            service = WorkflowService(db)
+            items: list[dict[str, Any]] = []
+            offset = 0
+            while True:
+                page = service.list_workflows(
+                    cursor=offset, limit=200, include_archived=include_archived
+                )
+                items.extend(page["items"])
+                if page["next_cursor"] is None:
+                    break
+                offset = page["next_cursor"]
         if name:
             items = [row for row in items if name.casefold() in str(row.get("name", "")).casefold()]
         return self._page(items, cursor, limit)

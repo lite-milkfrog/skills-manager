@@ -6,6 +6,11 @@ const navStatusText = document.querySelector('#navStatusText');
 const navStatusDot = document.querySelector('#navStatusDot');
 const searchBox = document.querySelector('#globalSearch');
 const appShell = document.querySelector('#appShell');
+const navToggle = document.querySelector('#navToggle');
+function setNavigationOpen(open) {
+  appShell.classList.toggle('nav-open', open);
+  navToggle.setAttribute('aria-expanded', String(open));
+}
 const i18n = window.SCP_I18N;
 const localeZh = document.querySelector('#localeZh');
 const localeEn = document.querySelector('#localeEn');
@@ -14,8 +19,10 @@ const themeMedia = matchMedia('(prefers-color-scheme: dark)');
 function applyTheme() {
   document.documentElement.dataset.theme = themePreference.value === 'system'
     ? (themeMedia.matches ? 'dark' : 'light') : themePreference.value;
+  document.querySelector('meta[name="theme-color"]').content =
+    document.documentElement.dataset.theme === 'dark' ? '#121c1e' : '#f7f8f4';
 }
-try { themePreference.value = localStorage.getItem('scp-theme') || 'system'; } catch { themePreference.value = 'system'; }
+try { themePreference.value = localStorage.getItem('scp-theme') || 'light'; } catch { themePreference.value = 'light'; }
 applyTheme();
 themePreference.addEventListener('change', () => {
   try { localStorage.setItem('scp-theme', themePreference.value); } catch {}
@@ -556,7 +563,7 @@ async function render() {
   });
   setCrumbs(parts.length ? parts : ['overview']);
   loading();
-  appShell.classList.remove('nav-open');
+  setNavigationOpen(false);
   await refreshHealth();
   try {
     if (section === 'overview') await renderOverview();
@@ -1178,9 +1185,23 @@ function parseJson(value, label = 'JSON') {
   }
 }
 
+async function allWorkflowVersions(name = '') {
+  const items = [];
+  let cursor = 0;
+  do {
+    const params = new URLSearchParams({ limit: '200', include_archived: '1', cursor: String(cursor) });
+    if (name) params.set('name', name);
+    const page = await api('/api/workflows?' + params);
+    items.push(...page.items);
+    cursor = page.next_cursor;
+  } while (cursor !== null && cursor !== undefined);
+  return { items };
+}
+
 async function renderWorkflows() {
+  const zh = state.locale === 'zh-CN';
   const showArchived = routeInfo().query.get('archived') === '1';
-  const data = await api('/api/workflows?limit=200&include_archived=1');
+  const data = await allWorkflowVersions();
   const internalItems = data.items.filter(item => /^m\d{2}-/i.test(item.name || ''));
   const groups = new Map();
   data.items.filter(item => !/^m\d{2}-/i.test(item.name || '')).forEach(item => {
@@ -1197,16 +1218,6 @@ async function renderWorkflows() {
     '<a class="button primary" href="#/workflows/new">' + iconSvg('plus') + '<span>Create workflow</span></a>'
   );
 
-  root.innerHTML += '<section class="workflow-explainer">' +
-    '<div class="workflow-explainer-intro">' + iconSvg('automation', 'workflow-explainer-icon') +
-      '<div><span class="eyebrow">Workflow</span><h2>What is a workflow?</h2>' +
-      '<p>A workflow is a reusable execution plan: describe what each stage should accomplish, then attach Skills only where the Agent needs a specific capability.</p></div></div>' +
-    '<div class="workflow-how-grid">' +
-      '<div><span class="step-number">1</span><strong>1. Describe stages</strong><p>Write the goal, instructions and expected result for each stage.</p></div>' +
-      '<div><span class="step-number">2</span><strong>2. Attach capabilities</strong><p>Bind a Skill only when that stage needs one; Router and Composite Skills keep their internal workflow.</p></div>' +
-      '<div><span class="step-number">3</span><strong>3. Copy the Agent prompt</strong><p>Use the generated prompt in a new Agent conversation.</p></div>' +
-    '</div></section>';
-
   root.innerHTML += '<section class="workflow-user-list"><div class="section-head compact-head"><div><h2>Your workflows</h2><p>One entry per workflow; open version history when needed.</p></div><a class="button" href="#/workflows' + (showArchived ? '' : '?archived=1') + '">' + (showArchived ? 'Show active' : 'Show archived') + '</a></div>';
   if (!families.length) {
     root.innerHTML += '<div class="workflow-empty">' + iconSvg('automation', 'empty-icon') +
@@ -1219,19 +1230,27 @@ async function renderWorkflows() {
       const history = items.filter(item => item.workflow_id !== current.workflow_id);
       return '<article class="workflow-family"><div class="workflow-family-main"><div><strong>' + esc(current.name) +
         '</strong><p>' + esc(current.description || 'Reusable workflow.') + '</p><small>' +
-        (current.archived ? 'Archived' : 'Current') + ' · v' + current.version + ' · ' + items.length + ' versions</small></div>' +
-        '<div class="workflow-family-actions"><a class="button primary" href="#/workflows/' + esc(current.workflow_id) + '">Open</a>' +
-        '<a class="button" href="#/workflows/' + esc(current.workflow_id) + '/new-version">New version</a>' +
+        (current.archived ? (zh ? '已归档' : 'Archived') : (zh ? '当前' : 'Current')) + ' · v' + current.version + ' · ' + items.length + (zh ? ' 个版本' : ' versions') + '</small></div>' +
+        '<div class="workflow-family-actions"><a class="button primary" href="#/workflows/' + esc(current.workflow_id) + '">' + (zh ? '打开' : 'Open') + '</a>' +
+        '<a class="button" href="#/workflows/' + esc(current.workflow_id) + '/new-version">' + (zh ? '新建版本' : 'New version') + '</a>' +
         '<button class="button" type="button" data-workflow-action="' + (current.archived ? 'restore' : 'archive') + '" data-workflow-id="' + esc(current.workflow_id) + '">' +
-        (current.archived ? 'Restore' : 'Archive') + '</button></div></div>' +
-        (history.length ? '<details><summary>Version history (' + history.length + ')</summary><div class="workflow-version-list">' +
-          history.map(item => '<div class="workflow-version-row"><a href="#/workflows/' + esc(item.workflow_id) + '">v' + item.version + '</a><span>' +
-          (item.archived ? 'Archived' : 'Active') + '</span><button class="button" type="button" data-workflow-action="' +
+        (current.archived ? (zh ? '恢复' : 'Restore') : (zh ? '归档' : 'Archive')) + '</button></div></div>' +
+        (history.length ? '<details><summary>' + (zh ? '版本历史' : 'Version history') + ' (' + history.length + ')</summary><div class="workflow-version-list">' +
+          history.map(item => '<div class="workflow-version-row" data-archived="' + item.archived + '"><a href="#/workflows/' + esc(item.workflow_id) + '">v' + item.version + '</a><span>' +
+          (item.archived ? (zh ? '已归档' : 'Archived') : (zh ? '可用' : 'Active')) + '</span><button class="button" type="button" data-workflow-action="' +
           (item.archived ? 'restore' : 'archive') + '" data-workflow-id="' + esc(item.workflow_id) + '">' +
-          (item.archived ? 'Restore' : 'Archive') + '</button></div>').join('') + '</div></details>' : '') + '</article>';
+          (item.archived ? (zh ? '恢复' : 'Restore') : (zh ? '归档' : 'Archive')) + '</button></div>').join('') + '</div></details>' : '') +
+        (items.some(item => !item.archived) ? '<button class="button workflow-family-archive" type="button" data-family-archive="' + esc(current.name) + '">' + (zh ? '归档全部版本' : 'Archive all versions') + '</button>' : '') + '</article>';
     }).join('') + '</div>';
   }
   root.innerHTML += '</section>';
+  root.innerHTML += '<details class="workflow-explainer"><summary>' + iconSvg('automation', 'workflow-explainer-icon') +
+    '<span>How workflows work</span><span class="workflow-help-hint">Three steps from plan to Agent prompt</span></summary>' +
+    '<div class="workflow-how-grid">' +
+      '<div><span class="step-number">1</span><strong>1. Describe stages</strong><p>Write the goal, instructions and expected result for each stage.</p></div>' +
+      '<div><span class="step-number">2</span><strong>2. Attach capabilities</strong><p>Bind a Skill only when that stage needs one; Router and Composite Skills keep their internal workflow.</p></div>' +
+      '<div><span class="step-number">3</span><strong>3. Copy the Agent prompt</strong><p>Use the generated prompt in a new Agent conversation.</p></div>' +
+    '</div></details>';
   if (internalItems.length) {
     root.innerHTML += '<details class="advanced-summary system-workflows"><summary>' + iconSvg('system', 'summary-icon') +
       '<span>System test workflows</span><span class="summary-count">' + internalItems.length + '</span></summary>' +
@@ -1254,6 +1273,13 @@ async function renderWorkflows() {
         { method: 'POST', body: {} });
       await renderWorkflows();
       toast(action === 'archive' ? 'Workflow archived.' : 'Workflow restored.');
+    } catch (error) { toast(error.message, true); }
+  }));
+  root.querySelectorAll('[data-family-archive]').forEach(button => button.addEventListener('click', async () => {
+    if (!canMutate() || !confirm(zh ? '归档此工作流的全部版本？已有 Run 仍可查看。' : 'Archive every version in this workflow? Existing Runs remain available.')) return;
+    try {
+      await api('/api/workflow-families/archive', { method: 'POST', body: { name: button.dataset.familyArchive } });
+      await renderWorkflows();
     } catch (error) { toast(error.message, true); }
   }));
 }
@@ -1520,7 +1546,7 @@ async function renderWorkflowEditor(baseWorkflowId = null) {
   };
   if (baseWorkflowId) {
     const base = await api('/api/workflows/' + encodeURIComponent(baseWorkflowId));
-    const versions = await api('/api/workflows?name=' + encodeURIComponent(base.name) + '&include_archived=1&limit=200');
+    const versions = await allWorkflowVersions(base.name);
     const stageById = Object.fromEntries(base.stages.map(stage => [stage.stage_id, stage.key]));
     spec = {
       name: base.name,
@@ -2459,16 +2485,21 @@ document.addEventListener('keydown', event => {
     return;
   }
   if (event.key === 'Escape') {
-    appShell.classList.remove('nav-open');
+    setNavigationOpen(false);
     if (editing) document.activeElement.blur();
   }
 });
 
-document.querySelector('#navToggle').addEventListener('click', () => {
-  appShell.classList.toggle('nav-open');
+navToggle.addEventListener('click', () => {
+  setNavigationOpen(!appShell.classList.contains('nav-open'));
 });
 document.querySelector('.nav-list').addEventListener('click', () => {
-  appShell.classList.remove('nav-open');
+  setNavigationOpen(false);
+});
+document.addEventListener('click', event => {
+  if (appShell.classList.contains('nav-open') && !event.target.closest('.sidebar, #navToggle')) {
+    setNavigationOpen(false);
+  }
 });
 
 localeZh.addEventListener('click', () => setLocale('zh-CN'));

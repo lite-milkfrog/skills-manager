@@ -350,6 +350,7 @@ class WorkflowService:
         # Fallback references are the only cross-workflow schema reference today.
         return {
             "workflow_id": workflow_id,
+            "name": workflow["name"],
             "archived": workflow["archived"],
             "runs": runs,
             "run_count": sum(runs.values()),

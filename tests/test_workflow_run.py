@@ -96,6 +96,46 @@ def test_workflow_permanent_delete_requires_archived_and_zero_run(seeded) -> Non
     assert "workflow.archive" in actions and "workflow.delete" in actions
 
 
+@pytest.mark.parametrize("status", ["active", "blocked", "completed"])
+def test_archived_workflow_keeps_runs_in_every_lifecycle_state(seeded, status) -> None:
+    db = seeded["db"]
+    workflows = WorkflowService(db)
+    workflow_id = workflows.create_workflow(workflow_spec())["workflow_id"]
+    run = RunService(db).create_run(workflow_id, run_key=f"archive-{status}")
+    with db.transaction() as conn:
+        conn.execute(
+            "UPDATE workflow_runs SET status=? WHERE run_id=?", (status, run["run_id"])
+        )
+
+    workflows.archive_workflow(workflow_id)
+    usage = workflows.workflow_usage(workflow_id)
+    assert usage["runs"] == {status: 1}
+    assert RunService(db).get_run(run["run_id"])["status"] == status
+    assert usage["can_delete"] is False
+
+
+def test_workflow_reference_blocks_permanent_delete(seeded) -> None:
+    db = seeded["db"]
+    workflows = WorkflowService(db)
+    source = workflows.create_workflow(workflow_spec())
+    other_spec = workflow_spec()
+    other_spec["name"] = "Other workflow"
+    other = workflows.create_workflow(other_spec)
+    source_stage = source["stages"][0]["stage_id"]
+    other_stage = other["stages"][0]["stage_id"]
+    with db.transaction() as conn:
+        conn.execute(
+            "UPDATE workflow_stages SET fallback_stage_id=? WHERE stage_id=?",
+            (source_stage, other_stage),
+        )
+
+    workflows.archive_workflow(source["workflow_id"])
+    assert workflows.workflow_usage(source["workflow_id"])["reference_count"] == 1
+    with pytest.raises(ValidationError, match="workflow-delete-requires"):
+        workflows.delete_workflow_permanently(source["workflow_id"])
+    assert db.connection.execute("PRAGMA foreign_key_check").fetchall() == []
+
+
 def test_workflow_create_read_and_deterministic_binding_resolution(seeded) -> None:
     service = WorkflowService(seeded["db"])
     created = service.create_workflow(workflow_spec())
