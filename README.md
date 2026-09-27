@@ -25,6 +25,19 @@ This repository is the standalone source of truth for the project previously dev
 
 The Manager UI is optional. Agents read Skills and Workflows from the MCP/backend directly. Opening the UI is not part of the execution path.
 
+## Fastest path: give the repository to an AI agent
+
+Repository: **https://github.com/lite-milkfrog/skills-manager**
+
+For a capable Windows coding/computer agent, the intended handoff is simply:
+
+~~~text
+https://github.com/lite-milkfrog/skills-manager
+Please deploy this project.
+~~~
+
+The repository is self-dispatching for deployment. Root `AGENTS.md` directs the agent into `prompts/ONE-CLICK-AGENT-DEPLOY.md`, requires current default-branch HEAD verification, preserves dirty/diverged checkouts instead of resetting them, and continues through real 8943 MCP acceptance. The Manager UI on 8955 remains optional.
+
 ## Quick start on Windows
 
 ~~~powershell
