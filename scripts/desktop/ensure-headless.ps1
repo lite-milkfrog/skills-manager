@@ -6,19 +6,41 @@ $BaseState = if ($env:SKILLS_MANAGER_RUNTIME_HOME) { $env:SKILLS_MANAGER_RUNTIME
 $StateRoot = Join-Path $BaseState "headless"
 $HealthUrl = "http://127.0.0.1:8943/healthz"
 $Port = 8943
+$ExpectedIndexPath = [IO.Path]::GetFullPath((Join-Path $Root "runtime\state\index.json"))
+
+function Get-Health {
+    try {
+        return Invoke-RestMethod -Uri $HealthUrl -Method Get -TimeoutSec 2
+    }
+    catch { return $null }
+}
 
 function Test-Ready {
+    $response = Get-Health
+    if ($null -eq $response -or $response.ok -ne $true -or -not $response.index_path) {
+        return $false
+    }
     try {
-        $response = Invoke-RestMethod -Uri $HealthUrl -Method Get -TimeoutSec 2
-        return $null -ne $response
+        $actualIndexPath = [IO.Path]::GetFullPath([string]$response.index_path)
     }
     catch { return $false }
+    return [string]::Equals(
+        $actualIndexPath,
+        $ExpectedIndexPath,
+        [StringComparison]::OrdinalIgnoreCase
+    )
 }
 
 if (Test-Ready) { exit 0 }
 $listener = Get-NetTCPConnection -LocalPort $Port -State Listen -ErrorAction SilentlyContinue
 if ($listener) {
-    Write-Error "Port 8943 is occupied but Skills Manager health is not ready."
+    $health = Get-Health
+    if ($null -ne $health -and $health.index_path) {
+        Write-Error "Port 8943 is occupied by a different Skills Manager source: $($health.index_path). Expected: $ExpectedIndexPath"
+    }
+    else {
+        Write-Error "Port 8943 is occupied but Skills Manager health is not ready."
+    }
     exit 3
 }
 New-Item -ItemType Directory -Path $StateRoot -Force | Out-Null

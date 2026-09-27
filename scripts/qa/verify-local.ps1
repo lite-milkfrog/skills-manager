@@ -31,8 +31,23 @@ $bad = Get-ChildItem src,scripts -Recurse -File | Select-String -Pattern "C:\\Us
 if ($bad) { throw "machine-specific path remains in portable source/scripts" }
 
 if ($WithRunningServices) {
+    $expectedIndex = [IO.Path]::GetFullPath((Join-Path $root "runtime\state\index.json"))
     $mcp = Invoke-RestMethod "http://127.0.0.1:8943/healthz" -TimeoutSec 5
     $ui = Invoke-RestMethod "http://127.0.0.1:8955/api/health" -TimeoutSec 5
+
+    if (-not $mcp.ok) { throw "MCP health failed" }
+    $mcpIndex = [IO.Path]::GetFullPath([string]$mcp.index_path)
+    if (-not [string]::Equals($mcpIndex, $expectedIndex, [StringComparison]::OrdinalIgnoreCase)) {
+        throw "MCP source identity mismatch: $mcpIndex"
+    }
+
     if (-not $ui.ok) { throw "manager health failed" }
+    if (-not $ui.mutations_allowed -or -not $ui.parity.ok) {
+        throw "manager canonical truth is degraded"
+    }
+    $uiIndex = [IO.Path]::GetFullPath([string]$ui.registry.index_path)
+    if (-not [string]::Equals($uiIndex, $expectedIndex, [StringComparison]::OrdinalIgnoreCase)) {
+        throw "manager source identity mismatch: $uiIndex"
+    }
 }
 Write-Host "PASS: Skills Manager verification complete."
