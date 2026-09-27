@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="title desc">
+  <title id="title">Skill Control Plane</title>
+  <desc id="desc">An open control plane boundary with three connected orchestration nodes.</desc>
+  <rect x="20" y="20" width="216" height="216" rx="34" fill="#12161a"/>
+  <path d="M190 50H56v156h134" fill="none" stroke="#95a3ad" stroke-width="16" stroke-linecap="square" stroke-linejoin="miter"/>
+  <path d="M66 128h132" fill="none" stroke="#52c3b3" stroke-width="12" stroke-linecap="square"/>
+  <path d="M128 86v84" fill="none" stroke="#52c3b3" stroke-width="12" stroke-linecap="square"/>
+  <circle cx="82" cy="128" r="18" fill="#12161a" stroke="#e8ecef" stroke-width="10"/>
+  <circle cx="128" cy="128" r="22" fill="#52c3b3" stroke="#12161a" stroke-width="8"/>
+  <circle cx="176" cy="128" r="18" fill="#12161a" stroke="#e8ecef" stroke-width="10"/>
+</svg>

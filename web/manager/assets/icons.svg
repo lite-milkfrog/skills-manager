@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg">
+  <symbol id="menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+  <symbol id="grid" viewBox="0 0 24 24"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/></symbol>
+  <symbol id="folder" viewBox="0 0 24 24"><path d="M3.5 7.5h6l1.8 2H20.5v8.5a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z"/><path d="M3.5 7.5v-2a2 2 0 0 1 2-2h4l2 2h7a2 2 0 0 1 2 2v2"/></symbol>
+  <symbol id="prompt" viewBox="0 0 24 24"><path d="M4 5h16v12H8l-4 3z"/><path d="M8 9h8M8 13h5"/></symbol>
+  <symbol id="history" viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.3-5.7L4 8.5"/><path d="M4 4v4.5h4.5M12 8v4l3 2"/></symbol>
+  <symbol id="plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="up" viewBox="0 0 24 24"><path d="m7 14 5-5 5 5"/></symbol>
+  <symbol id="down" viewBox="0 0 24 24"><path d="m7 10 5 5 5-5"/></symbol>
+  <symbol id="trash" viewBox="0 0 24 24"><path d="M5 7h14M9 7V4h6v3M8 10v8M12 10v8M16 10v8M6.5 7l1 13h9l1-13"/></symbol>
+  <symbol id="skill" viewBox="0 0 24 24"><path d="M8 4h8v4a2 2 0 1 1 4 0v8h-4a2 2 0 1 1 0 4H8v-4a2 2 0 1 1-4 0V8h4a2 2 0 1 1 0-4z"/></symbol>
+  <symbol id="route" viewBox="0 0 24 24"><circle cx="5" cy="5" r="2"/><circle cx="19" cy="8" r="2"/><circle cx="19" cy="18" r="2"/><path d="M7 5h4a4 4 0 0 1 4 4v5M15 10l4-2M15 14l4 4"/></symbol>
+  <symbol id="home" viewBox="0 0 24 24"><path d="M3.5 10.8 12 3.8l8.5 7v9.4H15v-5.6H9v5.6H3.5z"/></symbol>
+  <symbol id="library" viewBox="0 0 24 24"><path d="M4 5.5h5v13H4zM10.5 5.5h4.5v13h-4.5zM16.5 5.5H20v13h-3.5z"/></symbol>
+  <symbol id="automation" viewBox="0 0 24 24"><circle cx="5" cy="6" r="2"/><circle cx="19" cy="6" r="2"/><circle cx="12" cy="18" r="2"/><path d="M7 6h10M6.3 7.7 10.7 16M17.7 7.7 13.3 16"/></symbol>
+  <symbol id="activity" viewBox="0 0 24 24"><path d="M4 12h3l2-5 4 10 2-5h5"/></symbol>
+  <symbol id="advanced" viewBox="0 0 24 24"><path d="M4 6h10M18 6h2M4 12h3M11 12h9M4 18h8M16 18h4"/><circle cx="16" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="14" cy="18" r="2"/></symbol>
+  <symbol id="search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6"/><path d="m15 15 5 5"/></symbol>
+  <symbol id="arrow" viewBox="0 0 24 24"><path d="M5 12h13M14 8l4 4-4 4"/></symbol>
+  <symbol id="web" viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="15" rx="2"/><path d="M3 8.5h18M8 8.5v11"/></symbol>
+  <symbol id="writing" viewBox="0 0 24 24"><path d="m5 18 1-4 10.7-10.7a1.8 1.8 0 0 1 2.6 2.6L8.5 16.6zM5 18l3.5-1.4"/></symbol>
+  <symbol id="image" viewBox="0 0 24 24"><rect x="3.5" y="4" width="17" height="16" rx="2"/><circle cx="9" cy="9" r="1.5"/><path d="m5 17 4-4 3 3 2-2 5 5"/></symbol>
+  <symbol id="video" viewBox="0 0 24 24"><rect x="3.5" y="5" width="13" height="14" rx="2"/><path d="m16.5 10 4-2v8l-4-2z"/></symbol>
+  <symbol id="research" viewBox="0 0 24 24"><circle cx="10" cy="10" r="5.5"/><path d="m14 14 5.5 5.5M10 7v6M7 10h6"/></symbol>
+  <symbol id="browser" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 8h18M8 15l3-3 2.5 2.5L17 11"/></symbol>
+  <symbol id="agent" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><circle cx="5" cy="6" r="1.5"/><circle cx="19" cy="6" r="1.5"/><circle cx="5" cy="18" r="1.5"/><circle cx="19" cy="18" r="1.5"/><path d="m7 7 3 3m4-1 3-2m-3 8 3 2m-7-2-3 2"/></symbol>
+  <symbol id="knowledge" viewBox="0 0 24 24"><path d="M5 4.5h6.5a3 3 0 0 1 3 3v12H8a3 3 0 0 1-3-3zM19 4.5h-4.5v15H19z"/></symbol>
+  <symbol id="data" viewBox="0 0 24 24"><path d="M5 19V9M10 19V5M15 19v-7M20 19V3"/></symbol>
+  <symbol id="slides" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="13" rx="2"/><path d="M8 21h8M12 17v4M8 8h8M8 12h5"/></symbol>
+  <symbol id="code" viewBox="0 0 24 24"><path d="m8 7-5 5 5 5M16 7l5 5-5 5M14 4l-4 16"/></symbol>
+  <symbol id="system" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2.8v2.1M12 19.1v2.1M2.8 12h2.1M19.1 12h2.1M5.5 5.5 7 7M17 17l1.5 1.5M18.5 5.5 17 7M7 17l-1.5 1.5"/></symbol>
+  <symbol id="health" viewBox="0 0 24 24"><path d="M4 12h4l2-5 4 10 2-5h4"/><circle cx="12" cy="12" r="9"/></symbol>
+  <symbol id="sources" viewBox="0 0 24 24"><path d="M4 7h12M13 4l3 3-3 3M20 17H8M11 14l-3 3 3 3"/></symbol>
+  <symbol id="organize" viewBox="0 0 24 24"><path d="M4 5h7v6H4zM13 5h7v6h-7zM4 13h7v6H4zM13 13h7v6h-7z"/></symbol>
+  <symbol id="contexts" viewBox="0 0 24 24"><circle cx="8" cy="8" r="3"/><circle cx="16" cy="16" r="3"/><path d="M10.5 9.5 13.5 14.5M15 5h4v4M5 15v4h4"/></symbol>
+  <symbol id="deploy" viewBox="0 0 24 24"><path d="M12 4v11M8 8l4-4 4 4M5 14v5h14v-5"/></symbol>
+  <symbol id="info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 10v6M12 7h.01"/></symbol>
+  <symbol id="document" viewBox="0 0 24 24"><path d="M6 3.5h8l4 4V20H6zM14 3.5V8h4M9 12h6M9 16h6"/></symbol>
+  <symbol id="check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12 2.5 2.5L16 9"/></symbol>
+  <symbol id="alert" viewBox="0 0 24 24"><path d="M12 3 21 20H3zM12 9v5M12 17h.01"/></symbol>
+</svg>

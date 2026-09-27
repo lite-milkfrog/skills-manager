@@ -1,0 +1,15 @@
+runtime/
+.pytest_cache/
+.ruff_cache/
+**/__pycache__/
+*.py[cod]
+.venv/
+.serena/cache/
+.serena/project.local.yml
+.tmp/
+*.log
+*.pid
+.env
+.env.*
+!/.env.example
+*.egg-info/

@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#111827">
+  <script>try{let p=localStorage.getItem('scp-theme')||'system';document.documentElement.dataset.theme=p==='system'?(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'):p}catch{document.documentElement.dataset.theme='light'}</script>
+  <title>Skill Control Plane</title>
+  <link rel="icon" type="image/svg+xml" href="/assets/skill-control-plane-mark.svg">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main" data-i18n="Skip to main content">Skip to main content</a>
+  <div class="app-shell" id="appShell">
+    <aside class="sidebar" aria-label="Primary navigation" data-i18n-aria-label="Primary navigation">
+      <div class="brand">
+        <img class="brand-mark" src="/assets/skill-control-plane-mark.svg" alt="" aria-hidden="true">
+        <div><strong>Skill Control Plane</strong><small data-i18n="Local Manager">Local Manager</small></div>
+      </div>
+      <nav class="nav-list">
+        <a href="#/overview" data-route="overview"><svg class="nav-icon" aria-hidden="true"><use href="/assets/icons.svg#home"></use></svg><span data-i18n="Home">Home</span></a>
+        <a href="#/skills" data-route="skills"><svg class="nav-icon" aria-hidden="true"><use href="/assets/icons.svg#library"></use></svg><span data-i18n="Skill Library">Skill Library</span></a>
+        <a href="#/workflows" data-route="workflows"><svg class="nav-icon" aria-hidden="true"><use href="/assets/icons.svg#automation"></use></svg><span data-i18n="Automations">Automations</span></a>
+        <a href="#/runs" data-route="runs"><svg class="nav-icon" aria-hidden="true"><use href="/assets/icons.svg#activity"></use></svg><span data-i18n="Activity">Activity</span></a>
+        <a href="#/advanced" data-route="advanced"><svg class="nav-icon" aria-hidden="true"><use href="/assets/icons.svg#advanced"></use></svg><span data-i18n="Advanced Tools">Advanced Tools</span></a>
+      </nav>
+      <div class="sidebar-foot">
+        <span class="status-dot" id="navStatusDot"></span>
+        <span id="navStatusText">Checking local runtime…</span>
+      </div>
+    </aside>
+
+    <section class="workspace">
+      <header class="topbar">
+        <button class="icon-button nav-toggle" id="navToggle" aria-label="Toggle navigation" data-i18n-aria-label="Toggle navigation"><svg class="ui-icon" aria-hidden="true"><use href="/assets/icons.svg#menu"></use></svg></button>
+        <div class="global-search-wrap">
+          <label class="sr-only" for="globalSearch" data-i18n="Search Skills">Search Skills</label>
+          <svg class="search-icon" aria-hidden="true"><use href="/assets/icons.svg#search"></use></svg>
+          <input id="globalSearch" name="global-search" type="search" placeholder="What do you want AI to help with?" data-i18n-placeholder="What do you want AI to help with?" autocomplete="off">
+          <kbd>Ctrl K</kbd>
+        </div>
+        <div class="locale-switch" role="group" aria-label="Language" data-i18n-aria-label="Language">
+          <button type="button" id="localeZh" data-locale="zh-CN" aria-pressed="true">中文</button>
+          <button type="button" id="localeEn" data-locale="en" aria-pressed="false">EN</button>
+        </div>
+        <label class="theme-control"><span data-i18n="Theme">Theme</span><select id="themePreference" aria-label="Theme"><option value="system" data-i18n="System">System</option><option value="light" data-i18n="Light">Light</option><option value="dark" data-i18n="Dark">Dark</option></select></label>
+        <div class="health-pill" id="healthPill" aria-live="polite">Runtime…</div>
+      </header>
+
+      <div class="degraded-banner" id="degradedBanner" hidden role="status" data-i18n="Canonical truth is degraded. Read-only inspection remains available; mutations are disabled.">
+        Canonical truth is degraded. Read-only inspection remains available; mutations are disabled.
+      </div>
+
+      <main id="main" tabindex="-1">
+        <div class="breadcrumbs" id="breadcrumbs" aria-label="Breadcrumb" data-i18n-aria-label="Breadcrumb"></div>
+        <div id="pageRoot" aria-live="polite"></div>
+      </main>
+    </section>
+  </div>
+
+  <div class="toast-region" id="toastRegion" aria-live="polite" aria-atomic="true"></div>
+  <script src="/i18n.js" defer></script>
+  <script src="/app.js" defer></script>
+</body>
+</html>

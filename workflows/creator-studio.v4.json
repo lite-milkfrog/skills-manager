@@ -1,0 +1,191 @@
+{
+  "name": "创作者工作室 / Creator Studio",
+  "version": 4,
+  "description": "生产版多交付 Creator Workflow。入口通过 knowledge-notes / writing-research / web-research 恢复能力和内容真源；核心个人表达明确由 human-writing 负责，避免 writing Router top-1 在研究/长文之间误选；交付类型正式分为 VIDEO、GRAPHIC/CAROUSEL、HYBRID。视频动态加载 creator-video-director 与最小充分引擎；图文由 visual-design-director + imagegen 产出真实最终资产；平台包装和 QA 都以最终文件为准，不停在脚本/Storyboard/Prompt。",
+  "stages": [
+    {
+      "key": "recover-source-capabilities",
+      "title": "恢复内容真源与创作能力",
+      "description": "先从 Obsidian/项目/历史作品恢复材料，并读取知识、写作、研究能力图。",
+      "instructions": "不打开 Skills Manager 前端取数据。resolve knowledge-notes 获取当前 Obsidian/知识能力；读取当前主题相关笔记/双链/历史作品/创作手册。resolve writing-research 仅用于了解当前写作与研究子能力，不让其 top-1 自动决定后续明确 owner。外部趋势/平台规则确实影响选题时才加载 web-research。区分用户亲历、可核验事实、观点/推测、未来计划。",
+      "expected_output": "SOURCE-TRUTH、Obsidian 依据、事实/经历边界、能力图与缺口。",
+      "completion_criteria": "不编造亲历/数据；可访问材料无需用户重复粘贴。",
+      "retry_limit": 1,
+      "bindings": [
+        {
+          "key": "knowledge-router",
+          "skill_id": "knowledge-notes",
+          "type": "required"
+        },
+        {
+          "key": "writing-router",
+          "skill_id": "writing-research",
+          "type": "required"
+        },
+        {
+          "key": "research-router",
+          "skill_id": "web-research",
+          "type": "optional"
+        }
+      ]
+    },
+    {
+      "key": "angle-evidence-master-structure",
+      "title": "选题、证据与母版结构",
+      "description": "先证明内容值得做，再选择格式。",
+      "instructions": "使用 HKR 检查 Hook/Knowledge/Resonance，形成受众、核心观点、反常识点、证据链、具体场景与行动价值。普通内容无需强制深研；需要系统横纵研究时动态 resolve hv-analysis；产品/工具内容需要冻结 CONTENT-TRUTH 时动态 resolve product-storytelling；需要当前外部事实时动态 resolve web-research。不得因为 Router 搜到某个写作 Skill 就提前开始写稿。",
+      "expected_output": "ANGLE.md：受众、HKR、核心观点、证据链、内容骨架、事实边界。",
+      "completion_criteria": "内容本身成立，研究与个人经历边界明确。",
+      "retry_limit": 1,
+      "bindings": [
+        {
+          "key": "research-router",
+          "skill_id": "web-research",
+          "type": "optional"
+        },
+        {
+          "key": "deep-research",
+          "skill_id": "hv-analysis",
+          "type": "optional"
+        },
+        {
+          "key": "product-truth",
+          "skill_id": "product-storytelling",
+          "type": "optional"
+        }
+      ]
+    },
+    {
+      "key": "personal-voice-master-copy",
+      "title": "个人表达与平台中立母稿",
+      "description": "由 human-writing 把事实真源变成自然、可说、可读的用户表达。",
+      "instructions": "human-writing 是默认个人表达 owner，负责自然中文、事实边界、口播可说性和去模型腔；真正需要长篇公众号式创作者叙事时才额外加载 khazix-writer。继承创作手册/HKR/具体场景/真实口吻，不复制他人身份经历。先形成 MASTER-COPY，再派生短口播、长口播、图文正文/卡片文案，所有版本共享事实真源。",
+      "expected_output": "MASTER-COPY + SCRIPT/CAROUSEL-COPY 分支。",
+      "completion_criteria": "自然可说/可读、事实可追溯、跨格式不变形。",
+      "retry_limit": 1,
+      "bindings": [
+        {
+          "key": "voice-owner",
+          "skill_id": "human-writing",
+          "type": "required",
+          "fallback_skill_id": "writing-research"
+        },
+        {
+          "key": "longform",
+          "skill_id": "khazix-writer",
+          "type": "optional"
+        }
+      ]
+    },
+    {
+      "key": "deliverable-route-creative-contract",
+      "title": "选择视频 / 图文 / 混合交付并冻结创意合同",
+      "description": "最终成品类型是一等公民，不默认所有内容走视频。",
+      "instructions": "根据目标、素材与平台明确 VIDEO / GRAPHIC-CAROUSEL / HYBRID。VIDEO：skills_search/resolve creator-video-director，保留其内容真源→Style Frames→FRAME/MOTION-MAP→素材/权利/声音→制作→验收内部编排。GRAPHIC/CAROUSEL：resolve visual-design-director，冻结信息层级、视觉策略、封面/卡片系统、画幅和 imagegen 策略；按需 resolve imagegen。HYBRID 共享 MASTER-COPY 和视觉世界，但视频/图文各自产生独立最终文件。",
+      "expected_output": "DELIVERABLE-CONTRACT：类型、平台、叙事/视觉方向、资产、权利与生产路线。",
+      "completion_criteria": "明确最终文件，不停在脚本/分镜；各路线 owner 清楚。",
+      "retry_limit": 1,
+      "bindings": []
+    },
+    {
+      "key": "produce-render-final-assets",
+      "title": "生产并渲染最终资产",
+      "description": "只加载所选路线的最小充分能力并实际产出文件。",
+      "instructions": "VIDEO：creator-video-director 为 owner；真人口播粗剪通过 image-media→ai-jian-koubo；常规参数化时间线按需 Remotion，复杂 SVG/GSAP/3D/Shader/Hero Motion 按需 HyperFrames，逐笔知识解释用 srt-whiteboard-animation，参考视频改编/生成式多素材或既有 Hypit 项目才用 hypit；Remotion/HyperFrames 不重复画同一信息层。GRAPHIC/CAROUSEL：visual-design-director 为 owner，用 imagegen 或当前验证过的静态视觉能力生成封面、单图、卡片组；不得只交 prompt。所有产物进入明确项目目录并保存 source/rights trace。",
+      "expected_output": "真实可播放视频或真实可预览图文资产 + 源文件/中间资产/资源追溯。",
+      "completion_criteria": "最终文件存在并可打开，不只是脚本/Storyboard/Prompt/render 命令。",
+      "retry_limit": 2,
+      "fallback_stage": "deliverable-route-creative-contract",
+      "bindings": [
+        {
+          "key": "wac",
+          "skill_id": "webgpt-as-codex",
+          "type": "required"
+        },
+        {
+          "key": "media-router",
+          "skill_id": "image-media",
+          "type": "optional"
+        }
+      ]
+    },
+    {
+      "key": "final-artifact-qa",
+      "title": "最终成品视觉、声音、技术与权利验收",
+      "description": "实际预览最终文件，导出成功不能代替 QA。",
+      "instructions": "VIDEO：动态 resolve image-media 的 video-frame-extractor 路线抽关键帧/接触表并实际听人声/BGM/SFX，核验字幕、编码、分辨率、帧率、时长、版权、隐私。GRAPHIC/CAROUSEL：用 visual-design-director 标准检查首图 Hook、层级、字号、边距、安全区、逐卡节奏、裁切、对比度、事实/数据、版权。问题回 owning source/engine 修，不在最终文件糊补丁。",
+      "expected_output": "REVIEW/QA evidence、关键帧或视觉检查、通过/返工结论。",
+      "completion_criteria": "最终成品被实际看/听；内容、视觉、声音(若有)、技术、权利与隐私通过。",
+      "retry_limit": 2,
+      "fallback_stage": "produce-render-final-assets",
+      "bindings": [
+        {
+          "key": "wac",
+          "skill_id": "webgpt-as-codex",
+          "type": "required"
+        },
+        {
+          "key": "media-router",
+          "skill_id": "image-media",
+          "type": "optional"
+        }
+      ]
+    },
+    {
+      "key": "platform-package",
+      "title": "抖音 / 小红书 / B站 / 视频号适配与发布包",
+      "description": "共享事实真源，但各平台独立适配节奏、画幅、标题、封面/首图和文案。",
+      "instructions": "human-writing 负责自然的平台标题/简介/正文变体，不用营销腔篡改事实。涉及当前尺寸、时长、上传限制、平台规则/趋势时动态 resolve web-research 并实时核验。B站保留完整叙事/证据；抖音快速进入处境/结果；小红书 GRAPHIC/CAROUSEL 强化首图 Hook、逐卡单一信息点和可保存价值，VIDEO 做相应短版；视频号重视包装与字幕。需要封面/首图时复用 visual-design-director + imagegen 视觉系统。没有发布连接就只交发布包，不声称自动发布。",
+      "expected_output": "所需平台的最终文件/裁切、标题/简介/正文、封面/首图、字幕/话题建议、当前规格依据和检查表。",
+      "completion_criteria": "事实一致、平台表达独立；时效规则可验证；未连接发布能力明确。",
+      "bindings": [
+        {
+          "key": "platform-copy-owner",
+          "skill_id": "human-writing",
+          "type": "required",
+          "fallback_skill_id": "writing-research"
+        },
+        {
+          "key": "research-router",
+          "skill_id": "web-research",
+          "type": "optional"
+        }
+      ]
+    },
+    {
+      "key": "archive-review-reuse",
+      "title": "Obsidian 复盘与资产沉淀",
+      "description": "把成品、母稿、视觉系统、结果和可复用经验沉淀回个人创作系统。",
+      "instructions": "通过 knowledge-notes 写入合适项目/SOT/复盘，保留原始日记/素材为真源不覆盖。记录最终文件、MASTER-COPY/SCRIPT、Style Frames/卡片系统、素材权利、平台包、实际结果和待验证假设；区分长期偏好、Agent 策略、一次实验与真实结果。临时缓存/大批 QA 证据不塞进 Obsidian。",
+      "expected_output": "复盘、资产索引/双链、可复用项与下次改进。",
+      "completion_criteria": "下一次能从真实资产继续，偏好/结果/假设不混淆。",
+      "bindings": [
+        {
+          "key": "knowledge-router",
+          "skill_id": "knowledge-notes",
+          "type": "required"
+        },
+        {
+          "key": "learn",
+          "skill_id": "self-optimization",
+          "type": "optional"
+        }
+      ]
+    },
+    {
+      "key": "loop-handoff",
+      "title": "Loop Engineering 与跨窗口接力",
+      "description": "长创作任务在阶段边界可靠保存并 exactly-once 接力。",
+      "instructions": "按 WAC 的 RECOVER→EXECUTE→OBSERVE→DIAGNOSE→EXPLORE→COMPARE→IMPROVE→VERIFY→RECORD→REUSE。跨窗口前写回 deliverable type、实际产物路径、已过/未过 Gate、实际 Skills/resources/tool 状态，再按 handoff-template exactly-once 交接；不依赖聊天记忆，不重复已经完成的渲染/发布步骤。",
+      "expected_output": "稳定状态、必要 next-window Prompt 与接力证据。",
+      "completion_criteria": "新窗口从文件/Workflow 状态恢复并继续同一成品。",
+      "bindings": [
+        {
+          "key": "wac",
+          "skill_id": "webgpt-as-codex",
+          "type": "required"
+        }
+      ]
+    }
+  ]
+}

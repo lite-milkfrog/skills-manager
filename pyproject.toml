@@ -1,0 +1,27 @@
+[project]
+name = "skills-manager"
+version = "0.3.0"
+description = "Local-first Skills registry, recursive resolver, workflow/run engine, MCP server, and human manager UI."
+requires-python = ">=3.11"
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "ruff>=0.6"]
+
+[project.scripts]
+skills-manager = "skill_control_plane.server:main"
+skills-manager-web = "skill_control_plane.web_manager:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
