@@ -567,7 +567,7 @@ async function render() {
   await refreshHealth();
   try {
     if (section === 'overview') await renderOverview();
-    else if (section === 'skills' && parts[1]) await renderSkillDetail(parts[1], parts[2] || 'about');
+    else if (section === 'skills' && parts[1]) await renderSkillDetail(parts[1], parts[2] || 'about', query);
     else if (section === 'skills') await renderSkills(query);
     else if (section === 'workflows' && parts[1] === 'new') await renderWorkflowEditor();
     else if (section === 'workflows' && parts[1] && parts[2] === 'new-version') await renderWorkflowEditor(parts[1]);
@@ -796,7 +796,15 @@ function buildSkillParams(params, changes = {}) {
   return value ? value : '';
 }
 
-async function renderSkillDetail(skillId, tab) {
+async function renderSkillDetail(skillId, tab, routeQuery = new URLSearchParams()) {
+  const returnWorkflowId = String(routeQuery.get('from_workflow') || '').trim();
+  const returnQuery = returnWorkflowId ? '?from_workflow=' + encodeURIComponent(returnWorkflowId) : '';
+  const skillHref = (targetTab = 'about') =>
+    '#/skills/' + esc(skillId) + '/' + targetTab + returnQuery;
+  const returnWorkflowAction = returnWorkflowId
+    ? '<a class="button" href="#/workflows/' + esc(returnWorkflowId) + '">' +
+      (state.locale === 'zh-CN' ? '返回工作流' : 'Back to workflow') + '</a>'
+    : '';
   const skill = await api('/api/skills/' + encodeURIComponent(skillId));
   const pageCases = inferUseCases(skill);
   const pageSummary = beginnerSkillSummary(skill, pageCases);
@@ -808,15 +816,16 @@ async function renderSkillDetail(skillId, tab) {
   const labels = { about: 'What it does', organization: 'Categories & tags', technical: 'Technical details' };
   const tabBar = primaryTabs.map(name =>
     '<a class="tab"' + (primaryTab === name ? ' aria-current="page"' : '') +
-    ' href="#/skills/' + esc(skillId) + '/' + name + '">' + labels[name] + '</a>'
+    ' href="' + skillHref(name) + '">' + labels[name] + '</a>'
   ).join('');
   const showTechActions = primaryTab === 'technical';
   root.innerHTML = pageHead(
     skill.name,
     pageSummary,
-    showTechActions
+    returnWorkflowAction +
+    (showTechActions
       ? '<button class="button" id="copyPath">Copy path</button><button class="button" id="openFolder">Open in Explorer</button>'
-      : ''
+      : '')
   ) + '<nav class="tabs" aria-label="Skill sections">' + tabBar + '</nav><div id="skillTab"></div>';
 
   document.querySelector('#copyPath')?.addEventListener('click', async () => {
@@ -906,10 +915,10 @@ async function renderSkillDetail(skillId, tab) {
       '<div class="capability-agent-rule"><strong>How the Agent should use it</strong><p>Read this Skill fully first. If it references routes, references, scripts or other Skills, follow those instructions recursively instead of stopping at this page.</p>' +
       (analysis.recursive ? '<p class="capability-emphasis">This Skill can be used as one complete Workflow step. Its internal steps stay intact unless the outer Workflow explicitly overrides them.</p>' : '') +
       '</div>' + childSkillList + fileList + toolList + capabilityRouteGraph(capabilityBundle) +
-      '<a class="text-action capability-body-link" href="#/skills/' + esc(skillId) + '/body">' +
+      '<a class="text-action capability-body-link" href="' + skillHref('body') + '">' +
       esc(msg('View full Skill instructions')) + ' →</a></section>' +
-      '<div class="purpose-actions"><a class="button primary" href="#/skills/' + esc(skillId) + '/organization">Organize</a>' +
-      '<a class="button" href="#/skills/' + esc(skillId) + '/technical">View technical details</a></div></section>' +
+      '<div class="purpose-actions"><a class="button primary" href="' + skillHref('organization') + '">Organize</a>' +
+      '<a class="button" href="' + skillHref('technical') + '">View technical details</a></div></section>' +
       '<aside class="simple-facts"><h3>What you need to know first</h3>' +
       '<div><span>Skill name</span><strong>' + esc(skill.name) + '</strong></div>' +
       '<div><span>Detected capability type</span><strong>' + esc(msg(capability.label)) + '</strong></div>' +
@@ -924,11 +933,11 @@ async function renderSkillDetail(skillId, tab) {
     host.innerHTML =
       '<div class="tech-explainer">' + iconSvg('system', 'tech-icon') + '<div><strong>This is maintenance and troubleshooting information.</strong><span>If you only want to use the Skill, you usually do not need the details below.</span></div></div>' +
       '<div class="technical-link-grid">' +
-      '<a class="technical-link" href="#/skills/' + esc(skillId) + '/overview">' + iconSvg('info', 'technical-link-icon') + '<span><strong>Basic technical information</strong><small>skill_id, source, authority, path and digest</small></span>' + iconSvg('arrow', 'card-arrow') + '</a>' +
-      '<a class="technical-link" href="#/skills/' + esc(skillId) + '/variants">' + iconSvg('sources', 'technical-link-icon') + '<span><strong>Versions & sources</strong><small>Inspect the selected, alternate and historical versions</small></span>' + iconSvg('arrow', 'card-arrow') + '</a>' +
-      '<a class="technical-link" href="#/skills/' + esc(skillId) + '/body">' + iconSvg('document', 'technical-link-icon') + '<span><strong>Raw SKILL.md</strong><small>Read the complete original Skill instructions</small></span>' + iconSvg('arrow', 'card-arrow') + '</a>' +
-      '<a class="technical-link" href="#/skills/' + esc(skillId) + '/validation">' + iconSvg('check', 'technical-link-icon') + '<span><strong>Validation & evaluation</strong><small>Run Skill validation or evaluate it for a task</small></span>' + iconSvg('arrow', 'card-arrow') + '</a>' +
-      '<a class="technical-link" href="#/skills/' + esc(skillId) + '/relations">' + iconSvg('activity', 'technical-link-icon') + '<span><strong>Relations & activity</strong><small>See which runs used this Skill</small></span>' + iconSvg('arrow', 'card-arrow') + '</a></div>';
+      '<a class="technical-link" href="' + skillHref('overview') + '">' + iconSvg('info', 'technical-link-icon') + '<span><strong>Basic technical information</strong><small>skill_id, source, authority, path and digest</small></span>' + iconSvg('arrow', 'card-arrow') + '</a>' +
+      '<a class="technical-link" href="' + skillHref('variants') + '">' + iconSvg('sources', 'technical-link-icon') + '<span><strong>Versions & sources</strong><small>Inspect the selected, alternate and historical versions</small></span>' + iconSvg('arrow', 'card-arrow') + '</a>' +
+      '<a class="technical-link" href="' + skillHref('body') + '">' + iconSvg('document', 'technical-link-icon') + '<span><strong>Raw SKILL.md</strong><small>Read the complete original Skill instructions</small></span>' + iconSvg('arrow', 'card-arrow') + '</a>' +
+      '<a class="technical-link" href="' + skillHref('validation') + '">' + iconSvg('check', 'technical-link-icon') + '<span><strong>Validation & evaluation</strong><small>Run Skill validation or evaluate it for a task</small></span>' + iconSvg('arrow', 'card-arrow') + '</a>' +
+      '<a class="technical-link" href="' + skillHref('relations') + '">' + iconSvg('activity', 'technical-link-icon') + '<span><strong>Relations & activity</strong><small>See which runs used this Skill</small></span>' + iconSvg('arrow', 'card-arrow') + '</a></div>';
     return;
   }
 
@@ -1384,10 +1393,16 @@ async function renderWorkflowDetail(workflowId) {
       capabilityBySkill[skillId] = { kind: inferCapabilityKind({ skill_id: skillId }), childSkills: [], internalFiles: [], recursive: false };
     }
   }));
+  const workflowSkillHref = skillId =>
+    '#/skills/' + esc(skillId) + '/about?from_workflow=' + encodeURIComponent(workflowId);
   const rows = workflow.stages.map(stage =>
     '<tr><td>' + stage.ordinal +
     '</td><td><strong>' + esc(stage.key) + '</strong></td><td>' +
-    esc(stage.bindings.map(binding => binding.skill_id).join(', ') || '—') +
+    (stage.bindings.map(binding => binding.skill_id).filter(Boolean).length
+      ? stage.bindings.map(binding => binding.skill_id).filter(Boolean)
+        .map(skillId => '<a class="row-link" href="' + workflowSkillHref(skillId) + '">' + esc(skillId) + '</a>')
+        .join(', ')
+      : '—') +
     '</td><td>' + stage.retry_limit +
     '</td><td>' + stage.loop_limit +
     '</td><td>' + esc(stage.fallback_stage_id ? stageById[stage.fallback_stage_id] || stage.fallback_stage_id : '—') +
@@ -1399,10 +1414,11 @@ async function renderWorkflowDetail(workflowId) {
       ? skills.map(skillId => {
           const analysis = capabilityBySkill[skillId];
           const capability = analysis?.kind || CAPABILITY_KINDS.single;
-          return '<span class="workflow-skill-token">' + iconSvg(capability.icon, 'workflow-skill-icon') +
+          return '<a class="workflow-skill-token" href="' + workflowSkillHref(skillId) + '">' +
+            iconSvg(capability.icon, 'workflow-skill-icon') +
             '<span><strong>' + esc(skillId) + '</strong><small>' + esc(msg(capability.label)) +
             (analysis?.recursive ? ' · ' + esc(msg('This Skill can be used as one complete Workflow step. Its internal steps stay intact unless the outer Workflow explicitly overrides them.')) : '') +
-            '</small></span></span>';
+            '</small></span></a>';
         }).join('')
       : '<span class="muted">' + esc(msg('Choose a Skill first')) + '</span>';
     return '<div class="human-step"><span class="step-number">' + (index + 1) + '</span><div class="step-copy">' +

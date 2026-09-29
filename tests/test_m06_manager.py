@@ -293,6 +293,21 @@ def test_workflow_http_archive_restore_and_delete_gate(seeded) -> None:
         thread.join(timeout=2)
 
 
+def test_workflow_skill_navigation_contract() -> None:
+    web_root = Path(__file__).resolve().parents[1] / "web" / "manager"
+    app = (web_root / "app.js").read_text(encoding="utf-8")
+    styles = (web_root / "styles.css").read_text(encoding="utf-8")
+
+    assert "renderSkillDetail(parts[1], parts[2] || 'about', query)" in app
+    assert "routeQuery.get('from_workflow')" in app
+    assert "Back to workflow" in app
+    assert "返回工作流" in app
+    assert "workflowSkillHref" in app
+    assert "'<a class=\"workflow-skill-token\" href=\"' + workflowSkillHref(skillId)" in app
+    assert "a.workflow-skill-token:hover" in styles
+    assert "a.workflow-skill-token:focus-visible" in styles
+
+
 def test_web_manager_typed_api_and_no_physical_apply(seeded) -> None:
     web_root = Path(__file__).resolve().parents[1] / "web" / "manager"
     server = create_server(
