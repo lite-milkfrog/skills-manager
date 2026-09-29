@@ -1,0 +1,242 @@
+{
+  "name": "创作者工作室 / Creator Studio",
+  "version": 5,
+  "description": "生产版多交付 Creator Workflow v5。保留 VIDEO / GRAPHIC-CAROUSEL / HYBRID 路线；VIDEO 正式加入环境实跑、参考片高密度逆向、Style Frame、Rhythm/Motion Language Gate、真实产品组件、guizang 产品宣传专项、Remotion master + HyperFrames hero 分工、Sound Map 与密集动效 QA。正式动画不得越过 frame.md / MOTION-LANGUAGE / RHYTHM-MAP Gate。",
+  "stages": [
+    {
+      "key": "recover-source-capabilities",
+      "title": "恢复内容真源与创作能力",
+      "description": "从 Obsidian/项目/历史作品恢复事实与当前能力图。",
+      "instructions": "先恢复内容真源，不依赖聊天记忆。读取知识/写作/研究能力；外部时效信息确实影响选题时再用 web-research。区分用户亲历、可核验事实、观点/推测与未来计划。",
+      "expected_output": "SOURCE-TRUTH、能力图、事实边界与缺口。",
+      "completion_criteria": "不编造经历/数据；可访问材料无需用户重复粘贴。",
+      "bindings": [
+        {
+          "key": "knowledge-router",
+          "skill_id": "knowledge-notes",
+          "type": "required"
+        },
+        {
+          "key": "writing-router",
+          "skill_id": "writing-research",
+          "type": "required"
+        },
+        {
+          "key": "research-router",
+          "skill_id": "web-research",
+          "type": "optional"
+        }
+      ],
+      "retry_limit": 1
+    },
+    {
+      "key": "angle-evidence-master-structure",
+      "title": "选题、证据与母版结构",
+      "description": "先证明内容成立，再决定形式。",
+      "instructions": "建立受众、核心观点、反常识点、证据链、具体场景和行动价值。需要系统研究才加载 hv-analysis；产品/工具内容用 product-storytelling 冻结 CONTENT-TRUTH；不要因发现某个视频 Skill 就提前开始做动效。",
+      "expected_output": "ANGLE.md / CONTENT-TRUTH：受众、观点、证据链、事实边界。",
+      "completion_criteria": "内容本身成立，研究和个人经历边界明确。",
+      "bindings": [
+        {
+          "key": "research-router",
+          "skill_id": "web-research",
+          "type": "optional"
+        },
+        {
+          "key": "deep-research",
+          "skill_id": "hv-analysis",
+          "type": "optional"
+        },
+        {
+          "key": "product-truth",
+          "skill_id": "product-storytelling",
+          "type": "optional"
+        }
+      ],
+      "retry_limit": 1
+    },
+    {
+      "key": "personal-voice-master-copy",
+      "title": "个人表达与平台中立母稿",
+      "description": "把事实真源变成自然可说、可读的母稿。",
+      "instructions": "human-writing 是默认个人表达 owner；长篇创作者叙事才额外使用 khazix-writer。先形成 MASTER-COPY，再派生口播/图文版本，所有版本共享事实真源。",
+      "expected_output": "MASTER-COPY + SCRIPT/CAROUSEL-COPY。",
+      "completion_criteria": "自然可说/可读、事实可追溯、跨格式不变形。",
+      "bindings": [
+        {
+          "key": "voice-owner",
+          "skill_id": "human-writing",
+          "type": "required",
+          "fallback_skill_id": "writing-research"
+        },
+        {
+          "key": "longform",
+          "skill_id": "khazix-writer",
+          "type": "optional"
+        }
+      ],
+      "retry_limit": 1
+    },
+    {
+      "key": "deliverable-route-creative-contract",
+      "title": "选择交付路线并冻结创意合同",
+      "description": "VIDEO / GRAPHIC-CAROUSEL / HYBRID 是一等公民；视频先过视觉和运动 Gate。",
+      "instructions": "明确交付类型、平台、画幅和真实素材。VIDEO：先 resolve creator-video-director。新环境/依赖变化先真实 smoke render；参考视频影响风格时做高密度抽帧与 beat/onset/silence 逆向；同内容做 Style Frames，用户选择后才冻结 frame.md。motion-heavy/reference-driven 项目再 resolve liquid-spatial-motion-language，冻结 MOTION-LANGUAGE.md 与 RHYTHM-MAP.json；软件产品宣传片可按需加载 guizang-product-video-skill 做 repo/style audit 和真实组件接入，但不得绕过总导演 Gate。GRAPHIC/CAROUSEL 继续由 visual-design-director 负责。",
+      "expected_output": "DELIVERABLE-CONTRACT；VIDEO 额外有 ENVIRONMENT-CHECK、Style Frames、frame.md；motion-heavy 还有 MOTION-LANGUAGE.md、RHYTHM-MAP.json。",
+      "completion_criteria": "正式视频动画未越过 Style Frame / frame / motion/rhythm Gate；产品宣传范围与平台面明确。",
+      "bindings": [
+        {
+          "key": "video-director",
+          "skill_id": "creator-video-director",
+          "type": "optional"
+        },
+        {
+          "key": "motion-language",
+          "skill_id": "liquid-spatial-motion-language",
+          "type": "optional"
+        },
+        {
+          "key": "product-promo-specialist",
+          "skill_id": "guizang-product-video-skill",
+          "type": "optional"
+        },
+        {
+          "key": "graphic-director",
+          "skill_id": "visual-design-director",
+          "type": "optional"
+        }
+      ],
+      "retry_limit": 1
+    },
+    {
+      "key": "produce-render-final-assets",
+      "title": "生产并渲染最终资产",
+      "description": "只加载所选路线的最小充分能力并真正输出文件。",
+      "instructions": "VIDEO：creator-video-director 为 owner。真实录屏/UI 优先；Remotion 负责 master timeline、真实媒体、字幕、声音和 final render；复杂 GSAP/SVG/2.5D/3D/Shader/Kinetic Type Hero Beat 才进入 HyperFrames，且先读取 liquid-spatial-motion-language（若适用）→ motion-doctrine → canonical HyperFrames → 所需 GSAP skill。软件产品宣传可使用 guizang 的真实组件/方向/音效/审片流程，但批准的 frame.md、MOTION-LANGUAGE、RHYTHM-MAP 优先。两个引擎不得重复画同一信息层。GRAPHIC 路线必须输出真实最终图，不停在 prompt。",
+      "expected_output": "可播放视频或真实可预览图文资产 + source/assets/trace。",
+      "completion_criteria": "最终文件存在可打开；工程可复现；没有占位假 UI；引擎 owner 清楚。",
+      "bindings": [
+        {
+          "key": "wac",
+          "skill_id": "webgpt-as-codex",
+          "type": "required"
+        },
+        {
+          "key": "video-director",
+          "skill_id": "creator-video-director",
+          "type": "optional"
+        },
+        {
+          "key": "motion-language",
+          "skill_id": "liquid-spatial-motion-language",
+          "type": "optional"
+        },
+        {
+          "key": "continuity-law",
+          "skill_id": "motion-doctrine",
+          "type": "optional"
+        },
+        {
+          "key": "product-promo-specialist",
+          "skill_id": "guizang-product-video-skill",
+          "type": "optional"
+        },
+        {
+          "key": "media-router",
+          "skill_id": "image-media",
+          "type": "optional"
+        }
+      ],
+      "retry_limit": 2,
+      "fallback_stage": "deliverable-route-creative-contract"
+    },
+    {
+      "key": "final-artifact-qa",
+      "title": "最终成品视觉、节奏、声音、技术与权利验收",
+      "description": "实际看/听最终文件；导出成功不等于通过。",
+      "instructions": "VIDEO：检查内容真源、真实 UI、字幕、音量、权利、编码。motion-heavy Beat 至少检查 action start、peak/mid、settle、next-scene entry，并对高速转场做密集抽帧；检查 one-hero-at-a-time、readable hold、Carrier/object continuity、RHYTHM-MAP 与 SOUND/MOTION MAP 对齐；用 ffprobe 验证 codec/fps/resolution/duration。产品宣传可复用 guizang 的 2fps contact sheet + 10fps transition strip 思路。问题回 owning source/engine 修，不在最终 MP4 糊补丁。",
+      "expected_output": "REVIEW.md、关键帧/转场证据、ffprobe 证据、通过/返工结论。",
+      "completion_criteria": "最终成品被实际看/听；内容、视觉、节奏、声音、技术、权利均通过。",
+      "bindings": [
+        {
+          "key": "wac",
+          "skill_id": "webgpt-as-codex",
+          "type": "required"
+        },
+        {
+          "key": "video-director",
+          "skill_id": "creator-video-director",
+          "type": "optional"
+        },
+        {
+          "key": "motion-language",
+          "skill_id": "liquid-spatial-motion-language",
+          "type": "optional"
+        },
+        {
+          "key": "media-router",
+          "skill_id": "image-media",
+          "type": "optional"
+        }
+      ],
+      "retry_limit": 2,
+      "fallback_stage": "produce-render-final-assets"
+    },
+    {
+      "key": "platform-package",
+      "title": "平台适配与发布包",
+      "description": "共享事实真源，但各平台独立适配节奏、画幅、标题与封面。",
+      "instructions": "human-writing 负责自然的平台标题/简介/正文；当前尺寸/时长/上传限制需实时核验。VIDEO 平台变体从同一 master timeline 和 Motion/Rhythm truth 派生，不为竖版重新发明另一套风格。没有发布连接就只交发布包，不声称已发布。",
+      "expected_output": "平台最终文件/裁切、标题、简介、封面/首图、字幕与检查表。",
+      "completion_criteria": "事实一致、平台表达独立、当前规格可验证。",
+      "bindings": [
+        {
+          "key": "platform-copy-owner",
+          "skill_id": "human-writing",
+          "type": "required",
+          "fallback_skill_id": "writing-research"
+        },
+        {
+          "key": "research-router",
+          "skill_id": "web-research",
+          "type": "optional"
+        }
+      ]
+    },
+    {
+      "key": "archive-review-reuse",
+      "title": "复盘与资产沉淀",
+      "description": "把成品、母稿、视觉/运动语言与结果沉淀回个人创作系统。",
+      "instructions": "记录最终文件、MASTER-COPY/SCRIPT、Style Frames、frame.md、MOTION-LANGUAGE、RHYTHM-MAP、素材权利、平台包、真实结果和待验证假设。新的跨项目运动规律先进入 Skill learnings，不把一次性视觉偏好硬编码成全局规则。",
+      "expected_output": "复盘、资产索引、可复用项和下次改进。",
+      "completion_criteria": "下一次能从真实资产继续；偏好/结果/假设不混淆。",
+      "bindings": [
+        {
+          "key": "knowledge-router",
+          "skill_id": "knowledge-notes",
+          "type": "required"
+        },
+        {
+          "key": "learn",
+          "skill_id": "self-optimization",
+          "type": "optional"
+        }
+      ]
+    },
+    {
+      "key": "loop-handoff",
+      "title": "Loop Engineering 与跨窗口接力",
+      "description": "长创作任务在阶段边界可靠保存并 exactly-once 接力。",
+      "instructions": "按 RECOVER→EXECUTE→OBSERVE→DIAGNOSE→EXPLORE→COMPARE→IMPROVE→VERIFY→RECORD→REUSE。跨窗口前写回 deliverable type、真实产物路径、Style/Motion/Rhythm Gate、已过/未过 QA、实际 Skills/resources/tool 状态；不依赖聊天记忆，不重复已完成渲染。",
+      "expected_output": "稳定状态、必要 next-window prompt 与接力证据。",
+      "completion_criteria": "新窗口能从文件/Workflow 状态继续同一成品。",
+      "bindings": [
+        {
+          "key": "wac",
+          "skill_id": "webgpt-as-codex",
+          "type": "required"
+        }
+      ]
+    }
+  ]
+}
