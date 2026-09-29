@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import argparse
+import ctypes
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -14,6 +16,19 @@ from skill_control_plane.storage import ControlPlaneDB
 from skill_control_plane.workflow import WorkflowService
 
 
+def _ensure_production_user_home() -> None:
+    if os.getenv("SKILLS_MANAGER_USER_HOME") or os.getenv(
+        "SKILL_CONTROL_PLANE_USER_HOME"
+    ):
+        return
+    if os.name != "nt":
+        return
+    buffer = ctypes.create_unicode_buffer(32768)
+    result = ctypes.windll.shell32.SHGetFolderPathW(None, 40, None, 0, buffer)
+    if result == 0 and buffer.value:
+        os.environ["SKILLS_MANAGER_USER_HOME"] = buffer.value
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -23,6 +38,7 @@ def main() -> int:
     parser.add_argument("--archive-older", action="store_true")
     args = parser.parse_args()
 
+    _ensure_production_user_home()
     registry = build_default_registry()
     snapshot = registry.payload(force=True)
     workflow_files = sorted((ROOT / "workflows").glob("*.json"))

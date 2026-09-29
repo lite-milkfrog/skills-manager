@@ -1,5 +1,6 @@
 param([int]$TimeoutSeconds = 20)
 $ErrorActionPreference = "Stop"
+$env:SKILLS_MANAGER_USER_HOME = [Environment]::GetFolderPath([Environment+SpecialFolder]::UserProfile)
 $Root = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
 $ServerScript = Join-Path $Root "scripts\desktop\headless-server.cmd"
 $BaseState = if ($env:SKILLS_MANAGER_RUNTIME_HOME) { $env:SKILLS_MANAGER_RUNTIME_HOME } else { Join-Path ([Environment]::GetFolderPath([Environment+SpecialFolder]::LocalApplicationData)) "SkillsManager" }
