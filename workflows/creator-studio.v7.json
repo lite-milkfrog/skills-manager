@@ -1,0 +1,440 @@
+{
+  "name": "创作者工作室 / Creator Studio",
+  "version": 7,
+  "description": "生产版 Creator Workflow v7。继承 v6 的 VIDEO / GRAPHIC-CAROUSEL / HYBRID、onetake continuity 与四次独立审核 Gate；修正完整 Skill coverage 语义：workflow_get 是 55 个 binding 的权威 inventory，workflow_plan 必须使用 include_optional=true 作为执行视图。任何 binding 都必须保留 ledger 行；required 必须 APPLIED，optional/conditional 必须 APPLIED 或 NOT_APPLICABLE(reason)。机器 validator 在 preflight / stage / final Gate 强制 FAIL silent skip。",
+  "stages": [
+    {
+      "key": "workflow-skill-coverage-preflight",
+      "title": "Workflow Skills 全量预检",
+      "description": "在任何创作动作前建立完整 binding ledger，禁止 silent skip。",
+      "instructions": "第一步必须调用 workflow_get 获取完整 binding inventory；再调用 workflow_plan(context + {include_optional:true})，禁止把默认 resolved_bindings 当成完整清单。把 workflow_get 返回的每一个 stage/binding 原样写入 SKILL-COVERAGE.json 与 SKILL-EXECUTION-TRACE.md；required 必须 canonical resolve，optional/conditional 也必须保留 ledger 行，只能后续变为 APPLIED 或 NOT_APPLICABLE(reason)。执行 workflow-skill-auditor 的 scripts/validate_coverage.py --mode preflight；missing row、required unresolved 或 duplicate/extra row => PRECHECK=FAIL。",
+      "expected_output": "workflow-get.json；workflow-plan-full.json(include_optional=true)；SKILL-COVERAGE.json；SKILL-EXECUTION-TRACE.md；机器 PRECHECK=PASS/FAIL。",
+      "completion_criteria": "workflow_get 的全部 bindings 均有且只有一个 ledger 行；plan(include_optional=true) 与 inventory 可对账；required 全部 canonical resolve；validator preflight PASS。",
+      "bindings": [
+        {
+          "key": "skill-coverage-auditor",
+          "skill_id": "workflow-skill-auditor",
+          "type": "required"
+        },
+        {
+          "key": "wac",
+          "skill_id": "webgpt-as-codex",
+          "type": "required"
+        }
+      ],
+      "retry_limit": 1
+    },
+    {
+      "key": "recover-source-capabilities",
+      "title": "恢复内容真源与创作能力",
+      "description": "从 Obsidian/项目/历史作品恢复事实与当前能力图。",
+      "instructions": "优先恢复真实内容真源，不依赖聊天记忆。knowledge-notes 与 writing-research 必须实际使用并在 Skill ledger 记录证据；外部时效信息确实影响选题时才用 web-research。区分用户亲历、可核验事实、观点/推测、未来计划。阶段结束更新 coverage ledger。",
+      "expected_output": "SOURCE-TRUTH、能力图、事实边界、缺口、Skill evidence。",
+      "completion_criteria": "不编造经历/数据；required Skills=APPLIED；optional 有 APPLIED/NOT_APPLICABLE 证据。",
+      "bindings": [
+        {
+          "key": "knowledge-router",
+          "skill_id": "knowledge-notes",
+          "type": "required"
+        },
+        {
+          "key": "writing-router",
+          "skill_id": "writing-research",
+          "type": "required"
+        },
+        {
+          "key": "research-router",
+          "skill_id": "web-research",
+          "type": "optional"
+        },
+        {
+          "key": "skill-coverage-auditor",
+          "skill_id": "workflow-skill-auditor",
+          "type": "required"
+        }
+      ],
+      "retry_limit": 1
+    },
+    {
+      "key": "angle-evidence-master-structure",
+      "title": "选题、证据与母版结构",
+      "description": "先证明内容成立，再决定形式。",
+      "instructions": "建立受众、核心观点、反常识点、证据链、具体场景和行动价值。产品/工具内容用 product-storytelling 冻结 CONTENT-TRUTH；需要系统研究才加载 hv-analysis。不得因为视频 Skill 很酷而提前决定镜头。阶段结束更新 Skill coverage evidence。",
+      "expected_output": "ANGLE.md / CONTENT-TRUTH / CLAIM-LEDGER。",
+      "completion_criteria": "内容成立；事实/观点/未来边界明确；本阶段 binding 全部被审计。",
+      "bindings": [
+        {
+          "key": "research-router",
+          "skill_id": "web-research",
+          "type": "optional"
+        },
+        {
+          "key": "deep-research",
+          "skill_id": "hv-analysis",
+          "type": "optional"
+        },
+        {
+          "key": "product-truth",
+          "skill_id": "product-storytelling",
+          "type": "optional"
+        },
+        {
+          "key": "skill-coverage-auditor",
+          "skill_id": "workflow-skill-auditor",
+          "type": "required"
+        }
+      ],
+      "retry_limit": 1
+    },
+    {
+      "key": "personal-voice-master-copy",
+      "title": "个人表达与平台中立母稿",
+      "description": "从事实真源写出自然、克制、能落到视觉的母稿。",
+      "instructions": "human-writing 是默认 owner，必须实际应用；长篇才用 khazix-writer。宣传片/无配音视频要把屏幕文案写成短句而不是旁白段落。所有 copy 必须回到 CONTENT-TRUTH/CLAIM-LEDGER。阶段结束更新 Skill coverage。",
+      "expected_output": "MASTER-COPY；SCRIPT/ONSCREEN-TEXT/CAROUSEL-COPY。",
+      "completion_criteria": "自然、短、可验证；required human-writing=APPLIED；optional 已明确。",
+      "bindings": [
+        {
+          "key": "voice-owner",
+          "skill_id": "human-writing",
+          "type": "required",
+          "fallback_skill_id": "writing-research"
+        },
+        {
+          "key": "longform",
+          "skill_id": "khazix-writer",
+          "type": "optional"
+        },
+        {
+          "key": "skill-coverage-auditor",
+          "skill_id": "workflow-skill-auditor",
+          "type": "required"
+        }
+      ],
+      "retry_limit": 1
+    },
+    {
+      "key": "deliverable-route-creative-contract",
+      "title": "选择交付路线并冻结创意合同",
+      "description": "VIDEO / GRAPHIC-CAROUSEL / HYBRID 分流；视频先过真实素材与视觉 Gate。",
+      "instructions": "明确 deliverable、平台、画幅、真实素材和权限。VIDEO 必须 resolve creator-video-director；motion-heavy/reference-driven 必须 resolve liquid-spatial-motion-language；软件产品宣传按需 guizang-product-video-skill；GRAPHIC 由 visual-design-director。生成 Style Frames 前先记录各 route Skill 的 APPLIED/NOT_APPLICABLE，禁止 silent skip。Style Frame 未选不得正式动画。 所有 route-specific optional Skills 即便不适用也不得从 ledger 消失，必须明确 NOT_APPLICABLE(reason)。",
+      "expected_output": "DELIVERABLE-CONTRACT；ENVIRONMENT-CHECK；Style Frame plan；route-specific Skill coverage。",
+      "completion_criteria": "路线明确；相关 Skill 已 resolve；Style Frame Gate 未被越过。",
+      "bindings": [
+        {
+          "key": "video-director",
+          "skill_id": "creator-video-director",
+          "type": "optional"
+        },
+        {
+          "key": "motion-language",
+          "skill_id": "liquid-spatial-motion-language",
+          "type": "optional"
+        },
+        {
+          "key": "product-promo-specialist",
+          "skill_id": "guizang-product-video-skill",
+          "type": "optional"
+        },
+        {
+          "key": "graphic-director",
+          "skill_id": "visual-design-director",
+          "type": "optional"
+        },
+        {
+          "key": "skill-coverage-auditor",
+          "skill_id": "workflow-skill-auditor",
+          "type": "required"
+        }
+      ],
+      "retry_limit": 1
+    },
+    {
+      "key": "video-concept-continuity-gate",
+      "title": "VIDEO 概念、节奏与连续性 Gate",
+      "description": "用 onetake + 现有 Motion Language 把视频从 PPT 结构变成有 carry 的连续产品片。",
+      "instructions": "仅 VIDEO/HYBRID 视频分支执行；其他路线由 auditor 标 NOT_APPLICABLE。VIDEO promo/motion-heavy 时 onetake 必须 APPLIED：先 reference deconstruction；提出 3 个中央视觉概念，必须在核心机制上不同；每个概念写 hook/carry/ruled-out/look；用户选定后写 beat sheet，逐 Beat 指明 what moves / what is still / what carries。再与 liquid-spatial-motion-language 的 Rhythm/Liquid/Spatial 和 motion-doctrine 连续性规则对齐。不得默认复用 onetake 模板故事；不得把旧片外观直接带过来。",
+      "expected_output": "REFERENCE-DECONSTRUCTION.md；CONCEPTS.md；用户选择记录；BEAT-CARRY-MAP.md；MOTION-LANGUAGE.md；RHYTHM-MAP.json。",
+      "completion_criteria": "VIDEO 路线 onetake=APPLIED；每个边界有 carry 或明确合法 hard cut；3 个概念确实不同；无 PPT 式场景替换。",
+      "bindings": [
+        {
+          "key": "onetake-continuity",
+          "skill_id": "onetake",
+          "type": "optional"
+        },
+        {
+          "key": "motion-language",
+          "skill_id": "liquid-spatial-motion-language",
+          "type": "optional"
+        },
+        {
+          "key": "continuity-law",
+          "skill_id": "motion-doctrine",
+          "type": "optional"
+        },
+        {
+          "key": "video-director",
+          "skill_id": "creator-video-director",
+          "type": "optional"
+        },
+        {
+          "key": "skill-coverage-auditor",
+          "skill_id": "workflow-skill-auditor",
+          "type": "required"
+        }
+      ],
+      "retry_limit": 2
+    },
+    {
+      "key": "design-storyboard-audit",
+      "title": "设计 / 文案 / 分镜独立审核",
+      "description": "在写正式动画代码前独立检查创意、真实 UI、文案、节奏与 Skill 覆盖。",
+      "instructions": "这是独立审核，不允许由上一阶段自我声明通过。重新读取 workflow_plan 与 SKILL-COVERAGE。VIDEO 检查 Style Frame、真实 UI、one-hero-at-a-time、beat 长短变化、carry、静止段、SFX 逻辑和 anti-card/PPT；GRAPHIC 检查信息层级、平台尺寸、真实素材。任何 required Skill 未 APPLIED、optional 未说明、Style/Motion Gate 缺失或画面仍像 PPT => FAIL，退回 owning stage。 审核前重新 workflow_get，并用 workflow_plan(include_optional=true) 交叉核对；运行 validate_coverage.py --mode stage --through-stage-key design-storyboard-audit。",
+      "expected_output": "DESIGN-AUDIT.md；更新后的 SKILL-COVERAGE.json；PASS/FAIL 与返工清单。",
+      "completion_criteria": "审核独立完成；workflow_get inventory 无漏项；截至本阶段 zero PENDING/BLOCKED/missing/duplicate；validator stage PASS；问题已回流而非带病开工。",
+      "bindings": [
+        {
+          "key": "skill-coverage-auditor",
+          "skill_id": "workflow-skill-auditor",
+          "type": "required"
+        },
+        {
+          "key": "video-director",
+          "skill_id": "creator-video-director",
+          "type": "optional"
+        },
+        {
+          "key": "onetake-continuity",
+          "skill_id": "onetake",
+          "type": "optional"
+        },
+        {
+          "key": "graphic-director",
+          "skill_id": "visual-design-director",
+          "type": "optional"
+        }
+      ],
+      "retry_limit": 2,
+      "fallback_stage": "video-concept-continuity-gate"
+    },
+    {
+      "key": "produce-render-final-assets",
+      "title": "生产并渲染最终资产",
+      "description": "严格按已批准的创意合同与 Skill 证据生产，不边做边换语言。",
+      "instructions": "VIDEO：creator-video-director 为 owner；真实 UI/素材优先。Remotion 负责 master timeline/真实媒体/屏幕文字/声音/final；复杂 Hero Beat 才用 HyperFrames。onetake 不强行替代引擎：如果项目已明确 Remotion/HyperFrames，则吸收其 reference/carry/camera/probe/verify 方法；需要独立 HTML one-take beat 时才使用其 compose/render pipeline。guizang 负责软件产品真实组件与 dense review。阶段内所有适用 bindings 都必须产生 evidence。GRAPHIC 必须输出真实文件。",
+      "expected_output": "可播放视频/真实图文资产；source/assets；持续更新 SKILL-EXECUTION-TRACE。",
+      "completion_criteria": "产物可打开；无假 UI/占位素材；engine owner 清楚；当前 stage Skill coverage PASS。",
+      "bindings": [
+        {
+          "key": "wac",
+          "skill_id": "webgpt-as-codex",
+          "type": "required"
+        },
+        {
+          "key": "video-director",
+          "skill_id": "creator-video-director",
+          "type": "optional"
+        },
+        {
+          "key": "motion-language",
+          "skill_id": "liquid-spatial-motion-language",
+          "type": "optional"
+        },
+        {
+          "key": "continuity-law",
+          "skill_id": "motion-doctrine",
+          "type": "optional"
+        },
+        {
+          "key": "onetake-continuity",
+          "skill_id": "onetake",
+          "type": "optional"
+        },
+        {
+          "key": "product-promo-specialist",
+          "skill_id": "guizang-product-video-skill",
+          "type": "optional"
+        },
+        {
+          "key": "media-router",
+          "skill_id": "image-media",
+          "type": "optional"
+        },
+        {
+          "key": "skill-coverage-auditor",
+          "skill_id": "workflow-skill-auditor",
+          "type": "required"
+        }
+      ],
+      "retry_limit": 2,
+      "fallback_stage": "design-storyboard-audit"
+    },
+    {
+      "key": "pre-export-independent-audit",
+      "title": "导出前独立审核",
+      "description": "不信任“已经能播放”，在 final render/export 前重新审计。",
+      "instructions": "重新从 workflow_plan 建立对照，不复用上一轮结论。VIDEO：用 onetake 的 anti-slideshow 思路检查 rhythm/carry/camera/framing，检查真实 UI、快速运动 blur、静止段、SFX 事件密度；creator-video-director 检查素材权利和 engine owner；auditor 检查所有已完成 stage bindings。发现 carry 断裂、均匀节奏、PPT 式替换、required 未 APPLIED、optional 未解释 => BLOCK final export。 审核前必须重新读取完整 workflow_get inventory，并运行 workflow_plan(include_optional=true)；执行 validate_coverage.py --mode stage --through-stage-key pre-export-independent-audit。",
+      "expected_output": "PRE-EXPORT-AUDIT.md；oracle/抽帧/关键状态证据；Skill coverage snapshot。",
+      "completion_criteria": "独立审核 PASS；截至本阶段 required-not-applied=0、missing_rows=0、duplicate_rows=0、PENDING=0、BLOCKED=0；machine validator PASS。",
+      "bindings": [
+        {
+          "key": "skill-coverage-auditor",
+          "skill_id": "workflow-skill-auditor",
+          "type": "required"
+        },
+        {
+          "key": "onetake-continuity",
+          "skill_id": "onetake",
+          "type": "optional"
+        },
+        {
+          "key": "video-director",
+          "skill_id": "creator-video-director",
+          "type": "optional"
+        },
+        {
+          "key": "motion-language",
+          "skill_id": "liquid-spatial-motion-language",
+          "type": "optional"
+        }
+      ],
+      "retry_limit": 2,
+      "fallback_stage": "produce-render-final-assets"
+    },
+    {
+      "key": "final-artifact-qa",
+      "title": "最终成品视觉、节奏、声音、技术与权利验收",
+      "description": "实际看、听、测最终文件；导出成功不等于通过。",
+      "instructions": "VIDEO 至少检查 full contact sheet + transition dense strips + start/peak/settle/next-entry，ffprobe 验证 codec/fps/resolution/duration；对照 onetake carry/oracle 结果与 Motion/Rhythm Map；实际听声音配置是否符合项目合同。所有问题回 owning source 修，不在 final MP4 上糊补丁。更新 coverage ledger。 本阶段结束运行 coverage stage validator，不能只凭人工 REVIEW.md 声称通过。",
+      "expected_output": "REVIEW.md；关键帧/转场/音频/ffprobe 证据；PASS/FAIL。",
+      "completion_criteria": "成品被实际看/听；内容、视觉、节奏、声音、技术、权利均通过。",
+      "bindings": [
+        {
+          "key": "wac",
+          "skill_id": "webgpt-as-codex",
+          "type": "required"
+        },
+        {
+          "key": "video-director",
+          "skill_id": "creator-video-director",
+          "type": "optional"
+        },
+        {
+          "key": "motion-language",
+          "skill_id": "liquid-spatial-motion-language",
+          "type": "optional"
+        },
+        {
+          "key": "onetake-continuity",
+          "skill_id": "onetake",
+          "type": "optional"
+        },
+        {
+          "key": "media-router",
+          "skill_id": "image-media",
+          "type": "optional"
+        },
+        {
+          "key": "skill-coverage-auditor",
+          "skill_id": "workflow-skill-auditor",
+          "type": "required"
+        }
+      ],
+      "retry_limit": 2,
+      "fallback_stage": "produce-render-final-assets"
+    },
+    {
+      "key": "final-skill-coverage-audit",
+      "title": "最终 Skills 覆盖审计",
+      "description": "以原始 Workflow plan 为基准做最后一次独立 binding 对账。",
+      "instructions": "必须重新 workflow_get 获取完整 55-binding inventory，并重新 workflow_plan(context + {include_optional:true})；不得信任旧 summary。逐 stage/binding 对照：required=APPLIED；optional/conditional=APPLIED 或 NOT_APPLICABLE(reason)；APPLIED 必须有 concrete action + artifact/decision/validation evidence；zero missing/extra/duplicate/PENDING/BLOCKED/unresolved。最后执行 workflow-skill-auditor/scripts/validate_coverage.py --mode final。任何非零退出码 => 整个 Workflow 不能声明完成。",
+      "expected_output": "workflow-get-final.json；workflow-plan-final.json(include_optional=true)；FINAL-SKILL-COVERAGE-AUDIT.md；最终 SKILL-COVERAGE.json；machine gate=PASS/FAIL。",
+      "completion_criteria": "total workflow_get bindings == ledger rows；APPLIED + NOT_APPLICABLE == total；required_not_applied=0；missing/extra/duplicate/PENDING/BLOCKED=0；validator final exit=0。",
+      "bindings": [
+        {
+          "key": "skill-coverage-auditor",
+          "skill_id": "workflow-skill-auditor",
+          "type": "required"
+        },
+        {
+          "key": "wac",
+          "skill_id": "webgpt-as-codex",
+          "type": "required"
+        }
+      ],
+      "retry_limit": 1,
+      "fallback_stage": "final-artifact-qa"
+    },
+    {
+      "key": "platform-package",
+      "title": "平台适配与发布包",
+      "description": "共享事实真源与 Motion truth，按平台派生而不是重新发明。",
+      "instructions": "human-writing 负责平台标题/简介/正文；当前规格实时核验。VIDEO 从同一 master timeline / Rhythm / Carry truth 派生横竖版本；没有发布连接就只交发布包。阶段结束更新 coverage ledger。",
+      "expected_output": "平台最终文件/裁切、标题、简介、封面/首图、检查表。",
+      "completion_criteria": "事实一致、平台表达独立；本阶段 Skills 已审计。",
+      "bindings": [
+        {
+          "key": "platform-copy-owner",
+          "skill_id": "human-writing",
+          "type": "required",
+          "fallback_skill_id": "writing-research"
+        },
+        {
+          "key": "research-router",
+          "skill_id": "web-research",
+          "type": "optional"
+        },
+        {
+          "key": "skill-coverage-auditor",
+          "skill_id": "workflow-skill-auditor",
+          "type": "required"
+        }
+      ]
+    },
+    {
+      "key": "archive-review-reuse",
+      "title": "复盘与资产沉淀",
+      "description": "沉淀真实成品、Skill evidence、Motion/Carry 规律和返工经验。",
+      "instructions": "记录 final、母稿、frame/Motion/Rhythm/Carry、素材权利、平台包、真实结果和 audit evidence。跨项目稳定规律先进入 Skill learnings；onetake 外部代码/素材受 PolyForm Noncommercial 约束，不复制进产品源码。阶段结束更新 final coverage。",
+      "expected_output": "复盘、资产索引、learned rules、许可证记录。",
+      "completion_criteria": "下次能从真实资产继续；Skill evidence 和许可证边界完整。",
+      "bindings": [
+        {
+          "key": "knowledge-router",
+          "skill_id": "knowledge-notes",
+          "type": "required"
+        },
+        {
+          "key": "learn",
+          "skill_id": "self-optimization",
+          "type": "optional"
+        },
+        {
+          "key": "skill-coverage-auditor",
+          "skill_id": "workflow-skill-auditor",
+          "type": "required"
+        }
+      ]
+    },
+    {
+      "key": "loop-handoff",
+      "title": "Loop Engineering 与跨窗口接力",
+      "description": "长任务在阶段边界 exactly-once 接力，同时携带 Skill coverage 真值。",
+      "instructions": "按 RECOVER→EXECUTE→OBSERVE→DIAGNOSE→EXPLORE→COMPARE→IMPROVE→VERIFY→RECORD→REUSE。交接必须写回当前 workflow_id/version、SKILL-COVERAGE、未过 Gate、真实产物路径、当前 Skills variant/hash 和 next stage；禁止新窗口凭聊天记忆重新猜。 接力包必须包含当前 validator mode/result；新窗口恢复后第一件事重新以 workflow_get inventory 校验，不允许只读 summary。",
+      "expected_output": "稳定状态、handoff prompt、Skill coverage snapshot。",
+      "completion_criteria": "新窗口能从文件/Workflow/coverage 状态继续，不重复已完成工作。",
+      "bindings": [
+        {
+          "key": "wac",
+          "skill_id": "webgpt-as-codex",
+          "type": "required"
+        },
+        {
+          "key": "skill-coverage-auditor",
+          "skill_id": "workflow-skill-auditor",
+          "type": "required"
+        }
+      ]
+    }
+  ]
+}
