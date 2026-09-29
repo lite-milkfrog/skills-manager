@@ -4,23 +4,58 @@ This directory contains version-controlled production Workflow specifications.
 
 Current production families:
 
-- `frontend-product-builder.v4.json`
-- `creator-studio.v7.json`
+- `frontend-product-builder.v6.json`
+- `creator-studio.v9.json`
 
-Creator Studio v7 adds and hardens:
-- NO-SILENT-SKIP workflow Skill coverage via `workflow-skill-auditor 1.1.0`
-- `workflow_get` as the authoritative complete binding inventory
-- `workflow_plan(..., include_optional=true)` as the full execution view
-- machine coverage validation for preflight / stage / final gates
-- onetake reference/rhythm/carry/anti-slideshow gates for VIDEO
-- independent design, pre-export, final artifact, and final Skill-coverage audits
+## Unified autonomous audit
 
-Older versions remain runtime history when they already exist in a local database.
+Both production workflows use one required audit Skill:
+
+- `autonomous-stage-auditor 2.0`
+
+It is a lossless capability union of the former:
+
+- `workflow-skill-auditor`
+- `autonomous-stage-auditor 1.x`
+- `loop-orchestrator`
+- `proof-loop`
+- `gauntlet-loop`
+- `design-loop`
+
+The source trees are preserved with SHA256 manifests under:
+
+`D:\AgentData\40_Archive\audit-skill-lossless-merge-20260929`
+
+Runtime behavior is now mode-routed inside one Skill:
+
+- FAST
+- PROOF
+- ADVERSARIAL
+- DESIGN
+- CREATIVE
+- COVERAGE
+
+This removes repeated Skill loading while preserving the strict invariants:
+
+```
+freeze target
+  -> produce actual artifact
+  -> capture evidence
+  -> independent/cold audit
+  -> FAIL/UNKNOWN ? repair/strategy reset : PASS
+  -> only PASS may advance
+```
+
+Creator Studio v9 keeps stage-by-stage audit across all 14 stages with one audit binding per stage.
+
+Frontend Product Builder v6 keeps stage-by-stage audit across all 7 stages; visual stages select DESIGN internally, engineering/browser stages PROOF, and high-impact polish DESIGN + ADVERSARIAL.
+
+`workflow_get` remains the authoritative complete binding inventory. The merged auditor owns NO-SILENT-SKIP coverage and stage-quality gating together.
+
+Older Workflow versions remain runtime history.
 
 Import with:
 
 ~~~powershell
 .\.venv\Scripts\python scripts\workflows\import-production.py --archive-older
 ~~~
-
-The import is idempotent for existing Workflow IDs and preserves Run history. The production importer recovers the real Windows UserProfile so WAC sandbox HOME does not hide configured Skill roots.

@@ -1,0 +1,401 @@
+{
+  "name": "前端产品构建 / Frontend Product Builder",
+  "version": 5,
+  "description": "生产版 Frontend Product Builder v5。继承 v4 Router+Owner 主链，新增逐阶段 Autonomous Stage Audit：每个阶段先冻结可验证目标，完成真实 artifact 后由独立/冷 critic 审判；未达到目标必须留在本阶段 repair→re-render/re-run→re-audit，禁止构建出来就交付。视觉阶段强制 design-loop，工程/浏览器阶段强制 proof-loop，关键精修阶段加入 gauntlet-loop。只有 machine audit PASS 才允许推进。",
+  "stages": [
+    {
+      "key": "recover-route-context",
+      "title": "恢复真源、能力图与任务模式",
+      "description": "入口只做真源恢复、Router 能力发现与保护边界，不让自动 Router 决定后续核心 owner。",
+      "instructions": "不打开 8955 管理页读取数据。直接 resolve web-ui 获取当前 routes/resources，用它识别 greenfield / existing-redesign / reference-rebuild / targeted-repair / component / motion-heavy 及专项候选；恢复 AGENTS/README/TASK/SOT/Git、相关 Obsidian、现有 UI、用户改动和 writer ownership。Router 结果是能力发现证据，不得因为 top-1 排名覆盖 Workflow 已明确的核心阶段 owner；若发现新的高权威等价能力，记录并在对应阶段比较后再替换。中大型工作可按需 resolve engineering-productivity；需要最新外部库/标准时按需 resolve web-research。 阶段开始前必须 resolve/read autonomous-stage-auditor，并冻结 .agent/stage-audit/<stage-key>/STAGE-CONTRACT.json；owner 产出真实 artifact 后不得直接结束。必须审计实际成品而非 maker summary，生成 attempt VERDICT/FINDINGS/evidence；FAIL/UNKNOWN 时保持当前 stage running，不调用 succeed_current，按 findings 修复并重新审计。连续两轮同根因无实质改进则 STRATEGY_RESET：重读目标/参考、替换失败机制或实现策略，但不得降低 acceptance bar。只有 autonomous-stage-auditor/scripts/validate_stage_audit.py exit=0 且 latest verdict=PASS，才允许推进下一 stage。BLOCKED_EXTERNAL/USER_STOP 可以停止，但不得标记完成。",
+      "expected_output": "项目/知识真源、web-ui capability map、任务模式、writer ownership、保护边界、专项候选和缺口。；STAGE-CONTRACT.json；stage audit VERDICT/FINDINGS/evidence；STAGE-AUDIT-LEDGER 更新",
+      "completion_criteria": "无需管理页即可恢复；并发 WIP 不被覆盖；核心 owner 与专项候选分开记录。；且本阶段 autonomous stage audit machine gate=PASS，零未解决 BLOCKING/MAJOR，所有 frozen must criteria=PASS",
+      "retry_limit": 1,
+      "bindings": [
+        {
+          "key": "frontend-router",
+          "skill_id": "web-ui",
+          "type": "required"
+        },
+        {
+          "key": "wac",
+          "skill_id": "webgpt-as-codex",
+          "type": "required"
+        },
+        {
+          "key": "knowledge",
+          "skill_id": "knowledge-notes",
+          "type": "optional"
+        },
+        {
+          "key": "engineering-router",
+          "skill_id": "engineering-productivity",
+          "type": "optional"
+        },
+        {
+          "key": "research-router",
+          "skill_id": "web-research",
+          "type": "optional"
+        },
+        {
+          "key": "stage-quality-auditor",
+          "skill_id": "autonomous-stage-auditor",
+          "type": "required"
+        },
+        {
+          "key": "loop-orchestrator",
+          "skill_id": "loop-orchestrator",
+          "type": "required"
+        }
+      ],
+      "success_gate": {
+        "autonomous_stage_audit": {
+          "required": true,
+          "validator": "autonomous-stage-auditor/scripts/validate_stage_audit.py",
+          "required_result": "PASS",
+          "advance_only_on_exit_code": 0
+        }
+      },
+      "failure_gate": {
+        "autonomous_stage_audit": {
+          "on": [
+            "FAIL",
+            "UNKNOWN"
+          ],
+          "action": "repair_same_stage",
+          "call_fail_current": false,
+          "no_advance": true,
+          "strategy_reset_after_same_root_failures": 2,
+          "external_blocker_status": "BLOCKED_EXTERNAL"
+        }
+      }
+    },
+    {
+      "key": "ux-design-contract",
+      "title": "UX、信息架构与 Design Specification",
+      "description": "由 ui-design 一次冻结产品结构与设计合同，避免重复两阶段读取同一个设计专家。",
+      "instructions": "ui-design 是本阶段 owner。先做用户任务、信息架构、导航、主次操作、empty/error/loading、危险操作和新手路径，再冻结 Purpose、audience、aesthetic direction、既有品牌/design system 优先级、semantic tokens、Light/Dark/System、字体、颜色、间距、布局、组件、图标、focus、responsive、reduced-motion 与状态规则。管理/工具界面坚持 Operate 模式。若当前 canonical ui-design 不可用，fallback 到 web-ui 并按 UI/UX Design Specification 能力重新解析。 阶段开始前必须 resolve/read autonomous-stage-auditor，并冻结 .agent/stage-audit/<stage-key>/STAGE-CONTRACT.json；owner 产出真实 artifact 后不得直接结束。必须审计实际成品而非 maker summary，生成 attempt VERDICT/FINDINGS/evidence；FAIL/UNKNOWN 时保持当前 stage running，不调用 succeed_current，按 findings 修复并重新审计。连续两轮同根因无实质改进则 STRATEGY_RESET：重读目标/参考、替换失败机制或实现策略，但不得降低 acceptance bar。只有 autonomous-stage-auditor/scripts/validate_stage_audit.py exit=0 且 latest verdict=PASS，才允许推进下一 stage。BLOCKED_EXTERNAL/USER_STOP 可以停止，但不得标记完成。 本阶段视觉质量必须实际执行 design-loop：用真实 reference/brief、rendered evidence、fresh-context craft critic 和 repair→re-render→re-judge； merely fine/generic/vibe-coded 一律 FAIL。",
+      "expected_output": "PRODUCT-UX + DESIGN-SPEC。；STAGE-CONTRACT.json；stage audit VERDICT/FINDINGS/evidence；STAGE-AUDIT-LEDGER 更新",
+      "completion_criteria": "后续不再临时猜结构/视觉规则；主题、响应式、无障碍和状态合同完整。；且本阶段 autonomous stage audit machine gate=PASS，零未解决 BLOCKING/MAJOR，所有 frozen must criteria=PASS",
+      "retry_limit": 1,
+      "bindings": [
+        {
+          "key": "design-owner",
+          "skill_id": "ui-design",
+          "type": "required",
+          "fallback_skill_id": "web-ui"
+        },
+        {
+          "key": "stage-quality-auditor",
+          "skill_id": "autonomous-stage-auditor",
+          "type": "required"
+        },
+        {
+          "key": "visual-quality-loop",
+          "skill_id": "design-loop",
+          "type": "required"
+        }
+      ],
+      "success_gate": {
+        "autonomous_stage_audit": {
+          "required": true,
+          "validator": "autonomous-stage-auditor/scripts/validate_stage_audit.py",
+          "required_result": "PASS",
+          "advance_only_on_exit_code": 0
+        }
+      },
+      "failure_gate": {
+        "autonomous_stage_audit": {
+          "on": [
+            "FAIL",
+            "UNKNOWN"
+          ],
+          "action": "repair_same_stage",
+          "call_fail_current": false,
+          "no_advance": true,
+          "strategy_reset_after_same_root_failures": 2,
+          "external_blocker_status": "BLOCKED_EXTERNAL"
+        }
+      }
+    },
+    {
+      "key": "art-direction-special-route",
+      "title": "Frontend Design 与专项视觉路线",
+      "description": "由 frontend-design 把设计合同转成生产级视觉语言；专项任务按入口发现结果最小加载。",
+      "instructions": "frontend-design 是默认视觉 owner。落实 typography、surface/color、spacing、composition、component language、motion restraint 与反模板化，但不得推翻 DESIGN-SPEC。若 existing-redesign，动态 resolve redesign-existing-projects/impeccable critique；若 screenshot/Figma/reference，动态 resolve ui-image-to-code 与/或 pixel-perfect-reference-ui，reference 是视觉真源、现有 app 是行为真源；强营销才考虑 design-taste/brandkit/imagegen，重动效才考虑 cool-webpage-builder。默认 owner 不可用时 fallback web-ui。 阶段开始前必须 resolve/read autonomous-stage-auditor，并冻结 .agent/stage-audit/<stage-key>/STAGE-CONTRACT.json；owner 产出真实 artifact 后不得直接结束。必须审计实际成品而非 maker summary，生成 attempt VERDICT/FINDINGS/evidence；FAIL/UNKNOWN 时保持当前 stage running，不调用 succeed_current，按 findings 修复并重新审计。连续两轮同根因无实质改进则 STRATEGY_RESET：重读目标/参考、替换失败机制或实现策略，但不得降低 acceptance bar。只有 autonomous-stage-auditor/scripts/validate_stage_audit.py exit=0 且 latest verdict=PASS，才允许推进下一 stage。BLOCKED_EXTERNAL/USER_STOP 可以停止，但不得标记完成。 本阶段视觉质量必须实际执行 design-loop：用真实 reference/brief、rendered evidence、fresh-context craft critic 和 repair→re-render→re-judge； merely fine/generic/vibe-coded 一律 FAIL。",
+      "expected_output": "ART-DIRECTION、组件/页面视觉语言与实际需要的专项路线。；STAGE-CONTRACT.json；stage audit VERDICT/FINDINGS/evidence；STAGE-AUDIT-LEDGER 更新",
+      "completion_criteria": "有辨识度且与产品用途一致；专项能力按触发加载。；且本阶段 autonomous stage audit machine gate=PASS，零未解决 BLOCKING/MAJOR，所有 frozen must criteria=PASS",
+      "bindings": [
+        {
+          "key": "visual-owner",
+          "skill_id": "frontend-design",
+          "type": "required",
+          "fallback_skill_id": "web-ui"
+        },
+        {
+          "key": "stage-quality-auditor",
+          "skill_id": "autonomous-stage-auditor",
+          "type": "required"
+        },
+        {
+          "key": "visual-quality-loop",
+          "skill_id": "design-loop",
+          "type": "required"
+        }
+      ],
+      "success_gate": {
+        "autonomous_stage_audit": {
+          "required": true,
+          "validator": "autonomous-stage-auditor/scripts/validate_stage_audit.py",
+          "required_result": "PASS",
+          "advance_only_on_exit_code": 0
+        }
+      },
+      "failure_gate": {
+        "autonomous_stage_audit": {
+          "on": [
+            "FAIL",
+            "UNKNOWN"
+          ],
+          "action": "repair_same_stage",
+          "call_fail_current": false,
+          "no_advance": true,
+          "strategy_reset_after_same_root_failures": 2,
+          "external_blocker_status": "BLOCKED_EXTERNAL"
+        }
+      }
+    },
+    {
+      "key": "engineering-implementation",
+      "title": "工程实现",
+      "description": "由 web-development 在既有技术栈内实现真实产品。",
+      "instructions": "web-development 是工程 owner；Coding Tools 是默认唯一 writer，Serena 只做语义导航/理解。保留 package manager、framework、routing、state、API、权限和现有行为，不因重构换框架。只有项目真实采用 shadcn 时才加载 shadcn；中大型变更需要规格/工程纪律时才加载 engineering-productivity。每个增量可构建；owner 不可用时 fallback web-ui。 阶段开始前必须 resolve/read autonomous-stage-auditor，并冻结 .agent/stage-audit/<stage-key>/STAGE-CONTRACT.json；owner 产出真实 artifact 后不得直接结束。必须审计实际成品而非 maker summary，生成 attempt VERDICT/FINDINGS/evidence；FAIL/UNKNOWN 时保持当前 stage running，不调用 succeed_current，按 findings 修复并重新审计。连续两轮同根因无实质改进则 STRATEGY_RESET：重读目标/参考、替换失败机制或实现策略，但不得降低 acceptance bar。只有 autonomous-stage-auditor/scripts/validate_stage_audit.py exit=0 且 latest verdict=PASS，才允许推进下一 stage。BLOCKED_EXTERNAL/USER_STOP 可以停止，但不得标记完成。 本阶段必须实际执行 proof-loop：冻结 AC、builder/verifier 分离、对真实 runtime/test evidence 给逐 AC PASS/FAIL；builder 不得自签完成。",
+      "expected_output": "真实源码、必要测试与 build/type/lint 证据。；STAGE-CONTRACT.json；stage audit VERDICT/FINDINGS/evidence；STAGE-AUDIT-LEDGER 更新",
+      "completion_criteria": "核心流可运行、适用门禁通过、没有未经授权基础设施重写。；且本阶段 autonomous stage audit machine gate=PASS，零未解决 BLOCKING/MAJOR，所有 frozen must criteria=PASS",
+      "retry_limit": 2,
+      "bindings": [
+        {
+          "key": "engineering-owner",
+          "skill_id": "web-development",
+          "type": "required",
+          "fallback_skill_id": "web-ui"
+        },
+        {
+          "key": "wac",
+          "skill_id": "webgpt-as-codex",
+          "type": "required"
+        },
+        {
+          "key": "components",
+          "skill_id": "shadcn",
+          "type": "optional"
+        },
+        {
+          "key": "engineering-router",
+          "skill_id": "engineering-productivity",
+          "type": "optional"
+        },
+        {
+          "key": "stage-quality-auditor",
+          "skill_id": "autonomous-stage-auditor",
+          "type": "required"
+        },
+        {
+          "key": "proof-loop",
+          "skill_id": "proof-loop",
+          "type": "required"
+        }
+      ],
+      "success_gate": {
+        "autonomous_stage_audit": {
+          "required": true,
+          "validator": "autonomous-stage-auditor/scripts/validate_stage_audit.py",
+          "required_result": "PASS",
+          "advance_only_on_exit_code": 0
+        }
+      },
+      "failure_gate": {
+        "autonomous_stage_audit": {
+          "on": [
+            "FAIL",
+            "UNKNOWN"
+          ],
+          "action": "repair_same_stage",
+          "call_fail_current": false,
+          "no_advance": true,
+          "strategy_reset_after_same_root_failures": 2,
+          "external_blocker_status": "BLOCKED_EXTERNAL"
+        }
+      }
+    },
+    {
+      "key": "real-browser-validation",
+      "title": "真实浏览器、响应式、主题与参考一致性验收",
+      "description": "由 webapp-testing 用真实浏览器证明功能和体验。",
+      "instructions": "webapp-testing 是 Browser QA owner。真实打开路由，覆盖主流程、键盘/focus、empty/error/loading、console/page/network、目标 viewport；有主题则覆盖 System/Light/Dark、刷新持久化、首屏闪烁与对比度。常规优先 375/768/1024/1440。参考复刻任务追加专项视觉 parity；需要规则审查再加载 web-design-guidelines。Playwright 可用时不无理由降级 GUI。缺陷回 engineering 修复并复验；owner 不可用 fallback web-ui。 阶段开始前必须 resolve/read autonomous-stage-auditor，并冻结 .agent/stage-audit/<stage-key>/STAGE-CONTRACT.json；owner 产出真实 artifact 后不得直接结束。必须审计实际成品而非 maker summary，生成 attempt VERDICT/FINDINGS/evidence；FAIL/UNKNOWN 时保持当前 stage running，不调用 succeed_current，按 findings 修复并重新审计。连续两轮同根因无实质改进则 STRATEGY_RESET：重读目标/参考、替换失败机制或实现策略，但不得降低 acceptance bar。只有 autonomous-stage-auditor/scripts/validate_stage_audit.py exit=0 且 latest verdict=PASS，才允许推进下一 stage。BLOCKED_EXTERNAL/USER_STOP 可以停止，但不得标记完成。 本阶段必须实际执行 proof-loop：冻结 AC、builder/verifier 分离、对真实 runtime/test evidence 给逐 AC PASS/FAIL；builder 不得自签完成。",
+      "expected_output": "browser journeys、截图、console/network 与复验记录。；STAGE-CONTRACT.json；stage audit VERDICT/FINDINGS/evidence；STAGE-AUDIT-LEDGER 更新",
+      "completion_criteria": "关键流真实通过；无阻塞运行时错误；主题/响应式/参考一致性满足合同。；且本阶段 autonomous stage audit machine gate=PASS，零未解决 BLOCKING/MAJOR，所有 frozen must criteria=PASS",
+      "retry_limit": 2,
+      "fallback_stage": "engineering-implementation",
+      "bindings": [
+        {
+          "key": "browser-owner",
+          "skill_id": "webapp-testing",
+          "type": "required",
+          "fallback_skill_id": "web-ui"
+        },
+        {
+          "key": "guidelines",
+          "skill_id": "web-design-guidelines",
+          "type": "optional"
+        },
+        {
+          "key": "wac",
+          "skill_id": "webgpt-as-codex",
+          "type": "required"
+        },
+        {
+          "key": "stage-quality-auditor",
+          "skill_id": "autonomous-stage-auditor",
+          "type": "required"
+        },
+        {
+          "key": "proof-loop",
+          "skill_id": "proof-loop",
+          "type": "required"
+        }
+      ],
+      "success_gate": {
+        "autonomous_stage_audit": {
+          "required": true,
+          "validator": "autonomous-stage-auditor/scripts/validate_stage_audit.py",
+          "required_result": "PASS",
+          "advance_only_on_exit_code": 0
+        }
+      },
+      "failure_gate": {
+        "autonomous_stage_audit": {
+          "on": [
+            "FAIL",
+            "UNKNOWN"
+          ],
+          "action": "repair_same_stage",
+          "call_fail_current": false,
+          "no_advance": true,
+          "strategy_reset_after_same_root_failures": 2,
+          "external_blocker_status": "BLOCKED_EXTERNAL"
+        }
+      }
+    },
+    {
+      "key": "audit-bounded-polish",
+      "title": "自主审判、加固与持续精修",
+      "description": "由 impeccable + design-loop + adversarial critic 在真实证据上持续 critique/repair/re-audit，直到质量目标真正达到。",
+      "instructions": "impeccable 是最终质量 owner。基于真实截图/交互检查认知负担、层级、密度、对齐、排版、触摸目标、i18n/overflow、错误/空/加载态、reduced-motion、性能和设计漂移。批量观察→集中修复→重新渲染→独立重审；未 PASS 就继续循环，不设“做过一次就算了”的交付出口。需要规范审查再加载 web-design-guidelines，需要艺术方向修正再显式回 frontend-design。owner 不可用 fallback web-ui。 阶段开始前必须 resolve/read autonomous-stage-auditor，并冻结 .agent/stage-audit/<stage-key>/STAGE-CONTRACT.json；owner 产出真实 artifact 后不得直接结束。必须审计实际成品而非 maker summary，生成 attempt VERDICT/FINDINGS/evidence；FAIL/UNKNOWN 时保持当前 stage running，不调用 succeed_current，按 findings 修复并重新审计。连续两轮同根因无实质改进则 STRATEGY_RESET：重读目标/参考、替换失败机制或实现策略，但不得降低 acceptance bar。只有 autonomous-stage-auditor/scripts/validate_stage_audit.py exit=0 且 latest verdict=PASS，才允许推进下一 stage。BLOCKED_EXTERNAL/USER_STOP 可以停止，但不得标记完成。 本阶段视觉质量必须实际执行 design-loop：用真实 reference/brief、rendered evidence、fresh-context craft critic 和 repair→re-render→re-judge； merely fine/generic/vibe-coded 一律 FAIL。",
+      "expected_output": "审计清单、集中修复与最小 browser regression。；STAGE-CONTRACT.json；stage audit VERDICT/FINDINGS/evidence；STAGE-AUDIT-LEDGER 更新",
+      "completion_criteria": "无 P0 UX/视觉/可访问性缺陷；没有行为回退；严格质量目标已被独立证据证明达到。；且本阶段 autonomous stage audit machine gate=PASS，零未解决 BLOCKING/MAJOR，所有 frozen must criteria=PASS",
+      "retry_limit": 1,
+      "fallback_stage": "engineering-implementation",
+      "bindings": [
+        {
+          "key": "polish-owner",
+          "skill_id": "impeccable",
+          "type": "required",
+          "fallback_skill_id": "web-ui"
+        },
+        {
+          "key": "guidelines",
+          "skill_id": "web-design-guidelines",
+          "type": "optional"
+        },
+        {
+          "key": "stage-quality-auditor",
+          "skill_id": "autonomous-stage-auditor",
+          "type": "required"
+        },
+        {
+          "key": "visual-quality-loop",
+          "skill_id": "design-loop",
+          "type": "required"
+        },
+        {
+          "key": "adversarial-critic",
+          "skill_id": "gauntlet-loop",
+          "type": "required"
+        }
+      ],
+      "success_gate": {
+        "autonomous_stage_audit": {
+          "required": true,
+          "validator": "autonomous-stage-auditor/scripts/validate_stage_audit.py",
+          "required_result": "PASS",
+          "advance_only_on_exit_code": 0
+        }
+      },
+      "failure_gate": {
+        "autonomous_stage_audit": {
+          "on": [
+            "FAIL",
+            "UNKNOWN"
+          ],
+          "action": "repair_same_stage",
+          "call_fail_current": false,
+          "no_advance": true,
+          "strategy_reset_after_same_root_failures": 2,
+          "external_blocker_status": "BLOCKED_EXTERNAL"
+        }
+      }
+    },
+    {
+      "key": "record-reuse-handoff",
+      "title": "记录、复用与 Loop Engineering 接力",
+      "description": "记录真实路由、设计合同、源码与 QA 证据。",
+      "instructions": "记录实际 canonical owner/variant/authority、入口 Router 专项发现、followed resources、Design Spec、改动、测试和浏览器证据；更新 SOT。按 RECOVER→EXECUTE→OBSERVE→DIAGNOSE→EXPLORE→COMPARE→IMPROVE→VERIFY→RECORD→REUSE。跨窗口前先落盘状态，再 exactly-once handoff。单项目问题不得顺手改 WAC/Skills Manager 核心。 阶段开始前必须 resolve/read autonomous-stage-auditor，并冻结 .agent/stage-audit/<stage-key>/STAGE-CONTRACT.json；owner 产出真实 artifact 后不得直接结束。必须审计实际成品而非 maker summary，生成 attempt VERDICT/FINDINGS/evidence；FAIL/UNKNOWN 时保持当前 stage running，不调用 succeed_current，按 findings 修复并重新审计。连续两轮同根因无实质改进则 STRATEGY_RESET：重读目标/参考、替换失败机制或实现策略，但不得降低 acceptance bar。只有 autonomous-stage-auditor/scripts/validate_stage_audit.py exit=0 且 latest verdict=PASS，才允许推进下一 stage。BLOCKED_EXTERNAL/USER_STOP 可以停止，但不得标记完成。",
+      "expected_output": "验收摘要、路由/实现/QA 证据、SOT 与必要 handoff。；STAGE-CONTRACT.json；stage audit VERDICT/FINDINGS/evidence；STAGE-AUDIT-LEDGER 更新",
+      "completion_criteria": "新 Agent 不依赖聊天记忆即可恢复且不重复已完成阶段。；且本阶段 autonomous stage audit machine gate=PASS，零未解决 BLOCKING/MAJOR，所有 frozen must criteria=PASS",
+      "bindings": [
+        {
+          "key": "wac",
+          "skill_id": "webgpt-as-codex",
+          "type": "required"
+        },
+        {
+          "key": "knowledge",
+          "skill_id": "knowledge-notes",
+          "type": "optional"
+        },
+        {
+          "key": "learn",
+          "skill_id": "self-optimization",
+          "type": "optional"
+        },
+        {
+          "key": "stage-quality-auditor",
+          "skill_id": "autonomous-stage-auditor",
+          "type": "required"
+        }
+      ],
+      "success_gate": {
+        "autonomous_stage_audit": {
+          "required": true,
+          "validator": "autonomous-stage-auditor/scripts/validate_stage_audit.py",
+          "required_result": "PASS",
+          "advance_only_on_exit_code": 0
+        }
+      },
+      "failure_gate": {
+        "autonomous_stage_audit": {
+          "on": [
+            "FAIL",
+            "UNKNOWN"
+          ],
+          "action": "repair_same_stage",
+          "call_fail_current": false,
+          "no_advance": true,
+          "strategy_reset_after_same_root_failures": 2,
+          "external_blocker_status": "BLOCKED_EXTERNAL"
+        }
+      }
+    }
+  ]
+}
