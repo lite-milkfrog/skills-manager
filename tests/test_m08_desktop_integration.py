@@ -56,3 +56,6 @@ def test_m08_production_import_recovers_real_windows_profile() -> None:
     assert "_ensure_production_user_home" in importer
     assert "SKILLS_MANAGER_USER_HOME" in importer
     assert "SHGetFolderPathW" in importer
+    assert "stable_id" in importer
+    assert "_workflow_exists" in importer
+    assert "SELECT 1 FROM workflows WHERE workflow_id=?" in importer

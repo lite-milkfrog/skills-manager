@@ -13,6 +13,7 @@ sys.path.insert(0, str(ROOT / "src"))
 from skill_control_plane.core import build_default_registry
 from skill_control_plane.registry_store import RegistryStore
 from skill_control_plane.storage import ControlPlaneDB
+from skill_control_plane.utils import stable_id
 from skill_control_plane.workflow import WorkflowService
 
 
@@ -27,6 +28,21 @@ def _ensure_production_user_home() -> None:
     result = ctypes.windll.shell32.SHGetFolderPathW(None, 40, None, 0, buffer)
     if result == 0 and buffer.value:
         os.environ["SKILLS_MANAGER_USER_HOME"] = buffer.value
+
+
+def _workflow_id(spec: dict[str, object]) -> str:
+    return stable_id("wf", str(spec["name"]), int(spec["version"]))
+
+
+def _workflow_exists(db: ControlPlaneDB, spec: dict[str, object]) -> bool:
+    workflow_id = _workflow_id(spec)
+    return (
+        db.connection.execute(
+            "SELECT 1 FROM workflows WHERE workflow_id=?",
+            (workflow_id,),
+        ).fetchone()
+        is not None
+    )
 
 
 def main() -> int:
@@ -58,6 +74,12 @@ def main() -> int:
                 int(spec["version"]),
                 production.get(str(spec["name"]), 0),
             )
+            # Historical versioned specs remain repository artifacts even after
+            # their old provider Skills are retired. If this exact deterministic
+            # workflow already exists in the runtime DB, preserve it as-is and
+            # do not re-run current Skill validation against historical bindings.
+            if _workflow_exists(db, spec):
+                continue
             try:
                 result = service.create_workflow(spec)
                 created.append(str(result["workflow_id"]))
