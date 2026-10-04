@@ -1,0 +1,80 @@
+{
+  "name": "WebGPT-as-Codex Parallel Agent Orchestration",
+  "version": 1,
+  "description": "WAC 多 Agent 并行编排工作流。父 Agent 冻结 Stage 并拆分 child contracts，通过 Playwright exactly-once Fan-out；派发完成后进入 WAITING_FOR_CHILDREN 人工屏障，不后台轮询。用户重新唤醒后 fresh rescan 所有 receipt/handoff/Git 证据，生成 Fan-in summary 与 Build plan，再由独立 integration writer 构建，最后由独立审计关闭 Stage。",
+  "stages": [
+    {
+      "key": "wac-parallel-bootstrap",
+      "title": "父 Agent Bootstrap 与并行边界冻结",
+      "description": "恢复真实项目状态，判断哪些任务值得并行，并冻结 Stage/base HEAD/工具/权限边界。",
+      "instructions": "Resolve/read canonical webgpt-as-codex，读取 routing.md、workflow-registry.json、workflows/parallel-agent-orchestration.md 与 parallel-agent-contracts.md；本机任务再读 Inventory/environment。恢复 repo/SoT/Git HEAD/dirty/active writer。冻结 PROGRAM_ID、STAGE_ID、<STAGE>00-ORCH、base_head、Stage 唯一目标/out-of-scope。只把真正可独立的 research/dev slice 纳入 Fan-out；无法隔离的热点修改保持串行。此阶段不得替子 Agent 开始完成已计划的具体研究/开发工作。",
+      "expected_output": "Stage contract；execution map；parallelization decision；base HEAD；state-root locator；Orchestrator identity。",
+      "completion_criteria": "真实状态已从文件/Git恢复；并行收益与风险明确；不存在共享 worktree 多 writer 设计；父 Agent role 与 Stage 范围冻结。",
+      "retry_limit": 1,
+      "bindings": [
+        {"key": "wac", "skill_id": "webgpt-as-codex", "type": "required"}
+      ]
+    },
+    {
+      "key": "wac-parallel-fanout-plan",
+      "title": "Child 合同、命名与隔离工作区规划",
+      "description": "生成 machine-readable manifest 和每个子 Agent 的零猜测任务合同。",
+      "instructions": "按 <STAGE>00-ORCH、<STAGE><NN>-RESEARCH/DEV/REVIEW-<slug>、<STAGE>90-BUILD、<STAGE>99-AUDIT 命名。生成 STAGE-MANIFEST.json、FANOUT-PLAN.md、CHILD-STATUS.json，以及每个 child 的 TASK.md 与 PROMPT.md。Research 默认只读；DEV 必须提前分配独立 branch/worktree/ownership/dependencies，禁止共享 worktree。PROMPT.md 必须自包含 repo/source/tests/SoT/base HEAD、WAC bootstrap、tool map、输出路径/schema、tests/gates、forbidden actions、exit criteria；聊天回复不能替代 HANDOFF.json。",
+      "expected_output": "STAGE-MANIFEST.json；FANOUT-PLAN.md；CHILD-STATUS.json；全部 mandatory child TASK/PROMPT；DEV branch/worktree ownership map。",
+      "completion_criteria": "所有 mandatory child 均有唯一 Agent ID 和明确边界；DEV writer 隔离成立；prompt 无关键路径猜测；schemas/parallel-agent 合同可满足。",
+      "retry_limit": 1,
+      "bindings": [
+        {"key": "wac", "skill_id": "webgpt-as-codex", "type": "required"}
+      ]
+    },
+    {
+      "key": "wac-parallel-dispatch-barrier",
+      "title": "Playwright Exactly-once Fan-out 与人工等待屏障",
+      "description": "逐 child 提交并验证接管，然后停止父 Agent，等待用户之后显式恢复。",
+      "instructions": "每个 child 先落盘完整 PROMPT.md，计算 whitespace-normalized SHA-256 并建立 DISPATCH-RECEIPT.json。通过 Playwright/shared authenticated context 逐个 exactly-once submit：任何 submit primitive 前先写 DISPATCH_ATTEMPTED；超时/断线先查 conversation/composer/user-turn 后态；receipt 到 DISPATCH_ATTEMPTED 或更后时禁止 blind resubmit。验证后升级 DISPATCHED/TAKEOVER_CONFIRMED。不得无 receipt 批量开空白 tab。所有 mandatory child 派发完成后把父状态写为 WAITING_FOR_CHILDREN，并调用 run_block/等价 durable blocker 停止；不得后台轮询。只有用户明确回来要求汇总/继续时才 run_resume，核对 barrier 后再完成本 Stage。",
+      "expected_output": "每个 child 的 durable dispatch receipt；takeover evidence；WAITING_FOR_CHILDREN barrier；无重复 submit 证据。",
+      "completion_criteria": "mandatory child 均已安全 dispatch 或明确 blocker；父 Agent 已停在人工屏障；用户显式恢复前没有进入 Fan-in；恢复后 receipt 后态重新核对。",
+      "retry_limit": 2,
+      "bindings": [
+        {"key": "wac", "skill_id": "webgpt-as-codex", "type": "required"}
+      ]
+    },
+    {
+      "key": "wac-parallel-fanin-rescan",
+      "title": "人工恢复后的 Fresh Fan-in Rescan 与汇总",
+      "description": "不依赖父窗口旧记忆，重新扫描所有 child 文件与 Git 后态。",
+      "instructions": "用户显式恢复后，重新读取 STAGE-MANIFEST、每个 DISPATCH-RECEIPT/HANDOFF、Research REPORT/EVIDENCE、DEV branch/worktree/commit/diff/tests；检查 dependencies、ownership 越界、base drift、相互冲突、缺失/FAILED/BLOCKED/stale child。聊天内容只作线索。将每个 child 分类 VERIFIED/CONFLICT/MISSING/BLOCKED/HYPOTHESIS/REJECTED。生成 FANIN-SUMMARY.md 和 BUILD-PLAN.json；只有真实 handoff/Git/test 后态满足合同的 DEV 才能 ready_for_build=true。",
+      "expected_output": "fresh child-status reconstruction；FANIN-SUMMARY.md；BUILD-PLAN.json；dependency/conflict map；partial-failure decision。",
+      "completion_criteria": "所有 mandatory child 有明确证据状态；不存在凭聊天记忆判完成；Build inputs 可追溯到 handoff 和 Git；冲突/缺失已显式处理。",
+      "retry_limit": 1,
+      "bindings": [
+        {"key": "wac", "skill_id": "webgpt-as-codex", "type": "required"}
+      ]
+    },
+    {
+      "key": "wac-parallel-build-integration",
+      "title": "B90 Build / Integration 单 Writer 合并",
+      "description": "由专用 integration writer 消费已验证 DEV handoff，解决冲突并跑集成验证。",
+      "instructions": "创建/恢复 <STAGE>90-BUILD 专用 integration branch/worktree。只消费 BUILD-PLAN 中 ready_for_build=true 的 DEV commits；Research 结论只作为决策输入。按 dependency DAG 与 merge_order 合并/cherry-pick；同文件/同 symbol 冲突不得 last-write-wins，必须回到原任务和 evidence 做语义解析。跑 targeted integration tests 与 broader gate，生成 BUILD-RESULT.md 和 integration commit。Child 永远不能自行 merge 主分支。",
+      "expected_output": "integration branch/worktree；实际 merge order；冲突处理记录；BUILD-RESULT.md；integration commit；test/build evidence。",
+      "completion_criteria": "集成输入全部可追溯；冲突语义解决；mandatory tests/gates 通过或明确 RED/BLOCKED；无 child 越权 merge。",
+      "retry_limit": 2,
+      "bindings": [
+        {"key": "wac", "skill_id": "webgpt-as-codex", "type": "required"}
+      ]
+    },
+    {
+      "key": "wac-parallel-independent-audit",
+      "title": "B99 独立审计、Stage 收口与主 Loop 回归",
+      "description": "独立于 Build 判断并行 Stage 是否真实完成，再决定进入主 Program 下一 Stage。",
+      "instructions": "<STAGE>99-AUDIT 不接受 Build summary 自签。独立读取原 Stage contract、manifest、child handoffs、FANIN-SUMMARY、BUILD-PLAN、integration diff、tests/runtime evidence；检查 mandatory child coverage、writer isolation、是否丢失 child 结论、冲突处理、Stage exit criteria 和未报告 RED/BLOCKED。使用 autonomous-stage-auditor 做 PROOF/ADVERSARIAL 风格复核。PASS 后更新 Stage SoT/进度并回到 canonical Loop Engineering NEXT_STAGE；FAIL 保持当前 Stage 并给出 repair findings；BLOCKED/USER_STOP 不得伪称完成。",
+      "expected_output": "AUDIT-RESULT.md；独立 PASS/FAIL/BLOCKED evidence；Stage closure docs；next main-stage decision。",
+      "completion_criteria": "独立审计基于原始证据而非 maker summary；PASS 才允许 STAGE_COMPLETE；主 Loop 游标与 SoT 已更新。",
+      "retry_limit": 1,
+      "bindings": [
+        {"key": "wac", "skill_id": "webgpt-as-codex", "type": "required"},
+        {"key": "stage-quality-auditor", "skill_id": "autonomous-stage-auditor", "type": "required"}
+      ]
+    }
+  ]
+}

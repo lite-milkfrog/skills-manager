@@ -7,6 +7,7 @@ Current production families:
 - `frontend-product-builder.v6.json`
 - `creator-studio.v9.json`
 - `webgpt-as-codex-loop-engineering.v1.json`
+- `webgpt-as-codex-parallel-agent-orchestration.v1.json`
 
 
 ## Unified autonomous audit
