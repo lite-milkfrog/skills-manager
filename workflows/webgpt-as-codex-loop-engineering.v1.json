@@ -1,0 +1,76 @@
+{
+  "name": "WebGPT-as-Codex Loop Engineering",
+  "version": 1,
+  "description": "WAC 通用长任务执行工作流。以当前 canonical webgpt-as-codex Skill 为唯一执行合同，将其 long-running-engineering 语义映射到 Skills Manager MCP：Bootstrap/恢复 → 有界实现与验证 → Docs-before-prompt 收口 → Verified recursive handoff。Skills Manager 负责 Workflow/Run/Gate/Evidence；WAC 负责本机 MCP 路由、恢复与实际执行。",
+  "stages": [
+    {
+      "key": "wac-bootstrap-recover",
+      "title": "WAC Session Bootstrap 与真实状态恢复",
+      "description": "在任何实质性本机操作前加载当前 canonical WAC Skill、机器 Inventory/环境与项目 SoT，建立可恢复的执行真值。",
+      "instructions": "先 resolve/read 当前 canonical webgpt-as-codex；执行 session-bootstrap.md。读取 routing.md；涉及本机 MCP 时读取 MCP-SKILLS-INVENTORY 与 environment.local.md。恢复目标项目的 AGENTS/README/TASK/SOT、Git HEAD/status/dirty、当前用户改动、writer ownership 与已有 durable run。多阶段任务先匹配 WAC workflow-registry 或 Skills MCP 已有 Workflow。明确 CURRENT_STAGE / NEXT_STAGE / AFTER_NEXT_STAGE。Skill 漂移先 sync/check/validate；Bootstrap 完成前不得进行代码写入、文件修改、浏览器提交、GUI 副作用或发布。",
+      "expected_output": "canonical Skill/variant；execution map；repo/SoT/Git 真值；MCP capability/health map；CURRENT/NEXT/AFTER_NEXT；stage contract。",
+      "completion_criteria": "已从文件与工具恢复真实状态而非依赖聊天记忆；canonical WAC Skill 可解析且通过校验；Git/SoT/用户 WIP/工具边界明确；不存在因 direct schema 未暴露而误判本地 MCP 不存在。",
+      "retry_limit": 1,
+      "bindings": [
+        {
+          "key": "wac",
+          "skill_id": "webgpt-as-codex",
+          "type": "required"
+        }
+      ]
+    },
+    {
+      "key": "wac-bounded-execution",
+      "title": "有界执行、恢复与目标验证",
+      "description": "按 WAC 路由选择最窄且最接近数据源的能力，完成当前语义 Stage，并形成可核验的后态。",
+      "instructions": "按结构化能力优先与职责直达规则执行：语义代码导航优先 Serena，repo 修改/测试/Git 优先 Coding Tools，host 文件/进程优先 Desktop Commander，网页优先 Playwright，原生 GUI 才用 Windows-MCP。单 writer；外部副作用按 permissions.md。任何超时/连接中断/点击错误先查后态，再分类 failure；优先同工具恢复与策略调整，已登记本地 MCP 先自恢复，最后才跨工具 fallback。不得 blind retry、重复发送/创建/下载。执行 RECOVER→EXECUTE→OBSERVE→DIAGNOSE→EXPLORE→COMPARE→IMPROVE→VERIFY；当前 Stage 的目标动作、测试和后态证据必须完成。",
+      "expected_output": "当前 Stage 实际产物；变更 diff/动作记录；目标测试/运行时证据；失败分类与恢复证据；stage exit evidence。",
+      "completion_criteria": "用户目标动作真实发生；关键后态已验证；无未报告错误；没有越权/重复副作用；工具本地元数据未混入产品提交；当前 Stage exit criteria 满足。",
+      "retry_limit": 2,
+      "bindings": [
+        {
+          "key": "wac",
+          "skill_id": "webgpt-as-codex",
+          "type": "required"
+        }
+      ]
+    },
+    {
+      "key": "wac-docs-before-prompt-closure",
+      "title": "Docs-before-prompt 收口与经验沉淀",
+      "description": "先把实际 HEAD、测试、证据、风险与进度写回真源，再决定结束或生成下一棒。",
+      "instructions": "先更新全部受影响 live SoT / evidence / decision / risk / environment / routing / progress 文档并验证彼此一致；必要时形成 path-scoped closure commit。记录实际 canonical Skill variant/hash、工具路线、targeted validation 与 dirty state。将可复用故障根因按 scope 分流：通用规则→Skill，MCP 专项→Guide，本机路径/端口/账号/health→machine-local overlay，一次性事实→stage evidence。只有 docs barrier 完成后，才允许从当前 workflows/handoff-template.md 稳定核心重新实例化 next prompt；不得复制上一棒 prompt 局部改名。",
+      "expected_output": "更新后的 SoT/evidence；closure commit 或明确未提交原因；经验归档结论；基于真实 SOURCE_HEAD 的 next prompt 草案。",
+      "completion_criteria": "文档状态与真实 HEAD/tests/dirty 对齐；可复用经验已正确归类；CURRENT/NEXT/AFTER_NEXT 与完成定义明确；next prompt 在 docs barrier 之后生成且符合 Zero-Guess/recursive handoff 约束。",
+      "retry_limit": 1,
+      "bindings": [
+        {
+          "key": "wac",
+          "skill_id": "webgpt-as-codex",
+          "type": "required"
+        },
+        {
+          "key": "learn",
+          "skill_id": "self-optimization",
+          "type": "optional"
+        }
+      ]
+    },
+    {
+      "key": "wac-verified-recursive-handoff",
+      "title": "Verified Recursive Handoff 或全局关闭",
+      "description": "需要继续时 exactly-once 交接下一窗口并验证接管；真正满足全局完成门时才关闭程序。",
+      "instructions": "若用户授权自动接力：使用当前 handoff-template 生成的完整 prompt，明确 Skill 根、SoT 根、源码/测试根、CURRENT_STAGE/NEXT_STAGE/AFTER_NEXT_STAGE、SOURCE_HEAD、必要 MCP locator、未过 Gate 和恢复规则；通过 Playwright/shared context 或已验证 helper exactly-once 提交。提交失败或 session churn 时先枚举后态与现存页面，禁止批量新建 tab 或重复 submit；验证下一会话已真正接管并记录 receipt。若用户未授权自动提交，只能标记 STAGE_COMPLETE_HANDOFF_PENDING。只有 canonical program 的所有 mandatory stages/gates/tests/package/release 条件均满足且无 active RED，才允许 GLOBAL_LOOP_COMPLETE；USER_STOPPED / PAUSED_EXTERNAL_BLOCKER 不等于完成。",
+      "expected_output": "verified handoff receipt，或 STAGE_COMPLETE_HANDOFF_PENDING / USER_STOPPED / PAUSED_EXTERNAL_BLOCKER / GLOBAL_LOOP_COMPLETE 的真实终态证据。",
+      "completion_criteria": "继续执行时下一 worker 可从文件/Workflow/Run 恢复且不重复已完成副作用；停止状态不伪装完成；GLOBAL_LOOP_COMPLETE 仅在发布级完成定义全部满足时出现。",
+      "retry_limit": 1,
+      "bindings": [
+        {
+          "key": "wac",
+          "skill_id": "webgpt-as-codex",
+          "type": "required"
+        }
+      ]
+    }
+  ]
+}
