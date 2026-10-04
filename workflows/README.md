@@ -12,7 +12,7 @@ Current production families:
 
 ## Unified autonomous audit
 
-Both production workflows use one required audit Skill:
+Frontend Product Builder and Creator Studio use one unified required audit Skill:
 
 - `autonomous-stage-auditor 2.0`
 
